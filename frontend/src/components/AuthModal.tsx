@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import api from '../api/client';
 
@@ -16,6 +16,18 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
   const [loading, setLoading] = useState(false);
 
   const { login } = useAuth();
+
+  // Reset form state when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      setIsLoginMode(true);
+      setEmail('');
+      setPassword('');
+      setUsername('');
+      setError(null);
+      setLoading(false);
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
