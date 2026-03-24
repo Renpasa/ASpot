@@ -1,8 +1,11 @@
 import MapPage from './pages/MapPage';
+import { AuthProvider } from './context/AuthContext';
 
 function App() {
   return (
-    <MapPage />
+    <AuthProvider>
+      <MapPage />
+    </AuthProvider>
   );
 }
 
