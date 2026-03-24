@@ -2,9 +2,11 @@ import { useAuth } from '../context/AuthContext';
 
 interface HeaderProps {
   onLoginClick: () => void;
+  onAddSpotClick: () => void;
+  isCreatingMode?: boolean;
 }
 
-export default function Header({ onLoginClick }: HeaderProps) {
+export default function Header({ onLoginClick, onAddSpotClick, isCreatingMode }: HeaderProps) {
   const { user, logout } = useAuth();
 
   return (
@@ -17,6 +19,16 @@ export default function Header({ onLoginClick }: HeaderProps) {
         <div className="flex items-center space-x-4">
           {user ? (
             <>
+              <button
+                onClick={onAddSpotClick}
+                className={`text-sm font-semibold px-4 py-2 rounded-md transition-colors shadow-sm ${
+                  isCreatingMode
+                    ? 'bg-red-600 hover:bg-red-700 text-white'
+                    : 'bg-green-600 hover:bg-green-700 text-white'
+                }`}
+              >
+                {isCreatingMode ? 'Cancel Add Spot' : 'Add Spot'}
+              </button>
               <span className="text-sm font-medium text-gray-700">
                 Welcome, {user.username}
               </span>

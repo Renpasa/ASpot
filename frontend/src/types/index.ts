@@ -10,3 +10,12 @@ export interface PhotoSpot {
     username: string;
   };
 }
+
+export interface CreateSpotPayload {
+  lat: number;
+  lng: number;
+  title: string;
+  photo_url: string;
+  best_time?: string;
+  composition_tips?: string;
+}
