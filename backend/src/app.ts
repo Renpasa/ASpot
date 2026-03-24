@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import authRoutes from './routes/auth.routes';
+import spotRoutes from './routes/spot.routes';
 
 const app = express();
 
@@ -12,5 +13,6 @@ app.get('/health', (req, res) => {
 });
 
 app.use('/api/auth', authRoutes);
+app.use('/api/spots', spotRoutes);
 
 export default app;
