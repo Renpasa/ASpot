@@ -9,6 +9,7 @@
 - **前端**：React.ts (Vite), Tailwind CSS, React Router, Axios, Google Maps JS API。
 - **後端**：Node.js + Express (TypeScript), PostgreSQL。
 - **套件管理 (最高警戒)**：本專案**唯一合法**的套件管理工具是 `pnpm`。禁止使用 `npm install` 或產生 `package-lock.json`。若遇到依賴衝突，請提示人類處理，禁止擅自回退配置。
+- **Git 分支管理 (最高準則)**：禁止將新進度推送到舊的 Step 分支（特別是 `step-1-backend-init-1801347174266898932`）。每次開始新 Step，必須建立或切換到對應分支，嚴禁在已完成的分支上繼續開發。
 - **CI/CD 管線**：禁止主動修改 `.github/workflows/` 下的任何 YAML 檔案，除非人類明確下達 `SYSTEM OVERRIDE` 指令。
 
 ## 3. UI/UX 與 Stitch MCP 協作規範
