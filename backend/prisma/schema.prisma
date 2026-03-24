@@ -22,8 +22,8 @@ model PhotoSpot {
   lat              Float
   lng              Float
   title            String
-  photo_url        String?
+  photo_url        String
   best_time        String?
-  composition_tips String?
+  composition_tips String? @db.Text
   user             User   @relation(fields: [user_id], references: [id])
 }
