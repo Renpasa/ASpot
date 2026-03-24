@@ -1,0 +1,29 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id            Int         @id @default(autoincrement())
+  username      String      @unique
+  email         String      @unique
+  password_hash String
+  photoSpots    PhotoSpot[]
+}
+
+model PhotoSpot {
+  id               Int    @id @default(autoincrement())
+  user_id          Int
+  place_id         String?
+  lat              Float
+  lng              Float
+  title            String
+  photo_url        String
+  best_time        String?
+  composition_tips String? @db.Text
+  user             User   @relation(fields: [user_id], references: [id])
+}
