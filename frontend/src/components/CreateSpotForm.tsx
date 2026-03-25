@@ -40,8 +40,9 @@ export default function CreateSpotForm({
         best_time: bestTime || undefined,
         composition_tips: compositionTips || undefined,
       });
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to create spot.');
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { error?: string } } };
+      setError(error.response?.data?.error || 'Failed to create spot.');
       setIsSubmitting(false);
     }
   };

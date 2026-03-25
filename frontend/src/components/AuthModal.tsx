@@ -48,9 +48,10 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
         login(loginResponse.data.user, loginResponse.data.token);
         onClose();
       }
-    } catch (err: any) {
-      if (err.response && err.response.data && err.response.data.error) {
-        setError(err.response.data.error);
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { error?: string } } };
+      if (error.response && error.response.data && error.response.data.error) {
+        setError(error.response.data.error);
       } else {
         setError('An unexpected error occurred. Please try again.');
       }

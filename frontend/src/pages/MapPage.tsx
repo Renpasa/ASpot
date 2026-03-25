@@ -35,7 +35,7 @@ export default function MapPage() {
 
   const { user } = useAuth();
 
-  const loadSpots = async () => {
+  const loadSpots = useCallback(async () => {
     try {
       setLoading(true);
       const data = await fetchSpots();
@@ -47,11 +47,11 @@ export default function MapPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     loadSpots();
-  }, []);
+  }, [loadSpots]);
 
   const handleMapClick = useCallback((e: MapMouseEvent) => {
     if (isCreatingMode && e.detail.latLng) {

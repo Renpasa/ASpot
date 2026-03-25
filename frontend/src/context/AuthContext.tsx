@@ -16,19 +16,27 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(null);
+  const [user, setUser] = useState<User | null>(() => {
+    try {
+      const storedUserStr = localStorage.getItem('user');
+      return storedUserStr ? JSON.parse(storedUserStr) : null;
+    } catch {
+      return null;
+    }
+  });
+
+  const [token, setToken] = useState<string | null>(() => {
+    return localStorage.getItem('token');
+  });
 
   useEffect(() => {
-    // Check if token exists in local storage on mount
+    // Basic validation to clear invalid state on mount
     const storedToken = localStorage.getItem('token');
     const storedUserStr = localStorage.getItem('user');
 
     if (storedToken && storedUserStr) {
       try {
-        const storedUser = JSON.parse(storedUserStr);
-        setToken(storedToken);
-        setUser(storedUser);
+        JSON.parse(storedUserStr);
       } catch (e) {
         console.error('Failed to parse user from local storage:', e);
         localStorage.removeItem('token');
@@ -58,6 +66,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   );
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
