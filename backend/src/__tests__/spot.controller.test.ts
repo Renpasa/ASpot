@@ -64,6 +64,21 @@ describe('Spot Controller', () => {
       expect(prismaMock.photoSpot.create).not.toHaveBeenCalled();
     });
 
+    it('should return 400 if required fields are missing', async () => {
+      const token = jwt.sign({ id: 1, username: 'testuser' }, process.env.JWT_SECRET || 'fallback_secret');
+
+      const response = await request(app)
+        .post('/api/spots')
+        .set('Authorization', `Bearer ${token}`)
+        .send({
+          place_id: 'place1',
+        });
+
+      expect(response.status).toBe(400);
+      expect(response.body).toHaveProperty('error', 'lat, lng, title, and photo_url are required');
+      expect(prismaMock.photoSpot.create).not.toHaveBeenCalled();
+    });
+
     it('should return 201 and create a spot if token and valid data are provided', async () => {
       const token = jwt.sign({ id: 1, username: 'testuser' }, process.env.JWT_SECRET || 'fallback_secret');
 
@@ -96,6 +111,9 @@ describe('Spot Controller', () => {
 
       expect(response.status).toBe(201);
       expect(response.body.title).toBe('New Spot');
+      expect(response.body.lat).toBe(10);
+      expect(response.body.lng).toBe(20);
+      expect(response.body.photo_url).toBe('http://example.com/1.jpg');
       expect(prismaMock.photoSpot.create).toHaveBeenCalledTimes(1);
     });
   });
