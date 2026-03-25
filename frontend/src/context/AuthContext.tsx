@@ -17,16 +17,12 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(() => {
-    const storedUserStr = localStorage.getItem('user');
-    if (storedUserStr) {
-      try {
-        return JSON.parse(storedUserStr);
-      } catch (e) {
-        console.error('Failed to parse user from local storage:', e);
-        return null;
-      }
+    try {
+      const storedUserStr = localStorage.getItem('user');
+      return storedUserStr ? JSON.parse(storedUserStr) : null;
+    } catch {
+      return null;
     }
-    return null;
   });
 
   const [token, setToken] = useState<string | null>(() => {
@@ -34,15 +30,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   });
 
   useEffect(() => {
-    // If we couldn't parse the user but a token exists, clear them
+    // Basic validation to clear invalid state on mount
     const storedToken = localStorage.getItem('token');
     const storedUserStr = localStorage.getItem('user');
 
     if (storedToken && storedUserStr) {
       try {
         JSON.parse(storedUserStr);
-      } catch {
-        // Ignored, just for cleanup
+      } catch (e) {
+        console.error('Failed to parse user from local storage:', e);
         localStorage.removeItem('token');
         localStorage.removeItem('user');
       }

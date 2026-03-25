@@ -49,13 +49,9 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
         onClose();
       }
     } catch (err: unknown) {
-      if (typeof err === 'object' && err !== null && 'response' in err) {
-        const errResponse = (err as { response?: { data?: { error?: string } } }).response;
-        if (errResponse?.data?.error) {
-          setError(errResponse.data.error);
-        } else {
-          setError('An unexpected error occurred. Please try again.');
-        }
+      const error = err as { response?: { data?: { error?: string } } };
+      if (error.response && error.response.data && error.response.data.error) {
+        setError(error.response.data.error);
       } else {
         setError('An unexpected error occurred. Please try again.');
       }
