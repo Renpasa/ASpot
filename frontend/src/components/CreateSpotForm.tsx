@@ -35,7 +35,7 @@ export default function CreateSpotForm({
       return;
     }
 
-    const isImageValid = photoUrl.match(/\.(jpeg|jpg|gif|png|webp)(\?.*)?$/i) && photoUrl.startsWith('http');
+    const isImageValid = photoUrl.match(/\.(jpeg|jpg|gif|png|webp)(\?.*)?$/i) && photoUrl.match(/^https?:\/\//i);
     if (!isImageValid) {
       setError('Please provide a valid image URL starting with http/https and ending in an image extension.');
       return;

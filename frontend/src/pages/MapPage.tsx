@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { APIProvider, Map, AdvancedMarker, Pin, useMap } from '@vis.gl/react-google-maps';
 import type { MapMouseEvent } from '@vis.gl/react-google-maps';
 import SpotList from '../components/SpotList';
@@ -66,6 +66,14 @@ export default function MapPage() {
   }, [isCreatingMode]);
 
   const [showSuccessToast, setShowSuccessToast] = useState(false);
+  const toastTimeoutRef = useRef<number | undefined>(undefined);
+
+  useEffect(() => {
+    const pending = toastTimeoutRef.current;
+    return () => {
+      clearTimeout(pending);
+    };
+  }, []);
 
   const toggleCreatingMode = () => {
     setIsCreatingMode(!isCreatingMode);
@@ -85,7 +93,8 @@ export default function MapPage() {
     setIsCreatingMode(false);
     setNewSpotLocation(null);
     setShowSuccessToast(true);
-    setTimeout(() => setShowSuccessToast(false), 3000);
+    clearTimeout(toastTimeoutRef.current);
+    toastTimeoutRef.current = window.setTimeout(() => setShowSuccessToast(false), 3000);
   };
 
   return (

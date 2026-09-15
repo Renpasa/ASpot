@@ -4,6 +4,8 @@ import { MarkerClusterer } from '@googlemaps/markerclusterer';
 import type { Marker } from '@googlemaps/markerclusterer';
 import type { PhotoSpot } from '../types';
 
+type ClusterableMarker = Marker & { content?: Element | null };
+
 interface MarkersWithClusteringProps {
   spots: PhotoSpot[];
   selectedSpotId: number | null;
@@ -21,8 +23,7 @@ export default function MarkersWithClustering({
 }: MarkersWithClusteringProps) {
   const map = useMap();
   const markerLibrary = useMapsLibrary('marker');
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [markers, setMarkers] = useState<Record<number, any>>({});
+  const [markers, setMarkers] = useState<Record<number, ClusterableMarker>>({});
   const clusterer = useRef<MarkerClusterer | null>(null);
 
   // Store callbacks/state in refs so listeners always use latest without needing to recreate markers
@@ -54,8 +55,7 @@ export default function MarkersWithClustering({
 
     setMarkers(prevMarkers => {
       // Determine which spots are new or removed
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const newMarkers: Record<number, any> = { ...prevMarkers };
+      const newMarkers: Record<number, ClusterableMarker> = { ...prevMarkers };
       const currentSpotIds = new Set(spots.map(s => s.id));
       let changed = false;
       
@@ -97,7 +97,7 @@ export default function MarkersWithClustering({
       if (changed) {
         if (clusterer.current) {
           clusterer.current.clearMarkers();
-          clusterer.current.addMarkers(Object.values(newMarkers) as unknown as Marker[]);
+          clusterer.current.addMarkers(Object.values(newMarkers));
         }
         return newMarkers;
       }
