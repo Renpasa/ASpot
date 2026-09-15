@@ -2,8 +2,8 @@ import { useState } from 'react';
 import type { CreateSpotPayload } from '../types';
 
 interface CreateSpotFormProps {
-  initialLat: number;
-  initialLng: number;
+  initialLat?: number;
+  initialLng?: number;
   onSubmit: (data: CreateSpotPayload) => Promise<void>;
   onCancel: () => void;
 }
@@ -25,16 +25,27 @@ export default function CreateSpotForm({
     e.preventDefault();
     setError('');
 
+    if (initialLat === undefined || initialLng === undefined) {
+      setError('Please select a location on the map first.');
+      return;
+    }
+
     if (!title.trim() || !photoUrl.trim()) {
       setError('Title and Photo URL are required.');
+      return;
+    }
+
+    const isImageValid = photoUrl.match(/\.(jpeg|jpg|gif|png|webp)(\?.*)?$/i) && photoUrl.startsWith('http');
+    if (!isImageValid) {
+      setError('Please provide a valid image URL starting with http/https and ending in an image extension.');
       return;
     }
 
     setIsSubmitting(true);
     try {
       await onSubmit({
-        lat: initialLat,
-        lng: initialLng,
+        lat: initialLat as number,
+        lng: initialLng as number,
         title,
         photo_url: photoUrl,
         best_time: bestTime || undefined,
@@ -66,19 +77,23 @@ export default function CreateSpotForm({
             <input
               type="text"
               readOnly
-              value={initialLat.toFixed(6)}
+              value={initialLat !== undefined ? initialLat.toFixed(6) : ''}
               className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-500 text-sm"
               placeholder="Latitude"
             />
             <input
               type="text"
               readOnly
-              value={initialLng.toFixed(6)}
+              value={initialLng !== undefined ? initialLng.toFixed(6) : ''}
               className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-500 text-sm"
               placeholder="Longitude"
             />
           </div>
-          <p className="text-xs text-gray-500 mt-1">Click on the map to change location.</p>
+          {initialLat === undefined || initialLng === undefined ? (
+            <p className="text-sm text-red-500 mt-2 font-medium">Please click on the map to select a location.</p>
+          ) : (
+            <p className="text-xs text-gray-500 mt-1">Click on the map to change location.</p>
+          )}
         </div>
 
         <div>
@@ -150,7 +165,7 @@ export default function CreateSpotForm({
           </button>
           <button
             type="submit"
-            disabled={isSubmitting}
+            disabled={isSubmitting || initialLat === undefined || initialLng === undefined}
             className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50 flex justify-center items-center"
           >
             {isSubmitting ? 'Saving...' : 'Save Spot'}

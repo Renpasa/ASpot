@@ -40,12 +40,21 @@ export default function Header({ onLoginClick, onAddSpotClick, isCreatingMode }:
               </button>
             </>
           ) : (
-            <button
-              onClick={onLoginClick}
-              className="bg-blue-600 text-white text-sm font-semibold px-4 py-2 rounded-md hover:bg-blue-700 transition-colors shadow-sm"
-            >
-              Login / Register
-            </button>
+            <>
+              <button
+                onClick={onLoginClick}
+                title="Login to add a spot"
+                className="text-sm font-semibold px-4 py-2 rounded-md transition-colors shadow-sm bg-gray-200 text-gray-500 hover:bg-gray-300"
+              >
+                Add Spot
+              </button>
+              <button
+                onClick={onLoginClick}
+                className="bg-blue-600 text-white text-sm font-semibold px-4 py-2 rounded-md hover:bg-blue-700 transition-colors shadow-sm"
+              >
+                Login / Register
+              </button>
+            </>
           )}
         </div>
       </div>
