@@ -69,9 +69,8 @@ export default function MapPage() {
   const toastTimeoutRef = useRef<number | undefined>(undefined);
 
   useEffect(() => {
-    const pending = toastTimeoutRef.current;
     return () => {
-      clearTimeout(pending);
+      clearTimeout(toastTimeoutRef.current);
     };
   }, []);
 
