@@ -81,7 +81,7 @@ describe('Spot Controller', () => {
     });
 
     it('should return 400 if photo_url is invalid (junk, ftp, empty, non-image)', async () => {
-      const token = jwt.sign({ id: 1, username: 'testuser' }, process.env.JWT_SECRET || 'fallback_secret');
+      const token = jwt.sign({ id: 1, username: 'testuser' }, process.env.JWT_SECRET as string);
 
       const invalidUrls = [
         'ftp://example.com/image.jpg',
@@ -110,7 +110,7 @@ describe('Spot Controller', () => {
     });
 
     it('should return 201 and create a spot if token and valid data are provided (including seed/fallback URL shapes)', async () => {
-      const token = jwt.sign({ id: 1, username: 'testuser' }, process.env.JWT_SECRET || 'fallback_secret');
+      const token = jwt.sign({ id: 1, username: 'testuser' }, process.env.JWT_SECRET as string);
 
       const validUrls = [
         'http://example.com/1.jpg',
