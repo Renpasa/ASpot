@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import type { CreateSpotPayload } from '../types';
+import { isValidImageUrl } from '../utils/validation.util';
 
 interface CreateSpotFormProps {
   initialLat?: number;
@@ -35,9 +36,8 @@ export default function CreateSpotForm({
       return;
     }
 
-    const isImageValid = photoUrl.match(/\.(jpeg|jpg|gif|png|webp)(\?.*)?$/i) && photoUrl.match(/^https?:\/\//i);
-    if (!isImageValid) {
-      setError('Please provide a valid image URL starting with http/https and ending in an image extension.');
+    if (!isValidImageUrl(photoUrl)) {
+      setError('Please provide a valid image URL (must start with http/https and not be a non-image file type).');
       return;
     }
 

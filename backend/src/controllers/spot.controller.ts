@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import prisma from '../db';
 import { AuthRequest } from '../middlewares/auth.middleware';
+import { isValidImageUrl } from '../utils/validation.util';
 
 export const getSpots = async (req: Request, res: Response) => {
   try {
@@ -74,8 +75,13 @@ export const createSpot = async (req: AuthRequest, res: Response) => {
 
     const { place_id, lat, lng, title, photo_url, best_time, composition_tips } = req.body;
 
-    if (lat === undefined || lng === undefined || !title || !photo_url) {
+    // Check presence first. Empty string or undefined will fail this.
+    if (lat === undefined || lng === undefined || !title || photo_url === undefined) {
       return res.status(400).json({ error: 'lat, lng, title, and photo_url are required' });
+    }
+
+    if (!isValidImageUrl(photo_url)) {
+      return res.status(400).json({ error: 'Please provide a valid image URL (must start with http/https and not be a non-image file type).' });
     }
 
     const spot = await prisma.photoSpot.create({
@@ -128,7 +134,12 @@ export const updateSpot = async (req: AuthRequest, res: Response) => {
     if (lat !== undefined) updateData.lat = parseFloat(lat);
     if (lng !== undefined) updateData.lng = parseFloat(lng);
     if (title !== undefined) updateData.title = title;
-    if (photo_url !== undefined) updateData.photo_url = photo_url;
+    if (photo_url !== undefined) {
+      if (!isValidImageUrl(photo_url)) {
+        return res.status(400).json({ error: 'Please provide a valid image URL (must start with http/https and not be a non-image file type).' });
+      }
+      updateData.photo_url = photo_url;
+    }
     if (best_time !== undefined) updateData.best_time = best_time;
     if (composition_tips !== undefined) updateData.composition_tips = composition_tips;
 
