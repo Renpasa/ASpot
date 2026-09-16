@@ -11,15 +11,13 @@ interface MarkersWithClusteringProps {
   selectedSpotId: number | null;
   hoveredSpotId: number | null;
   onSelectSpot: (spot: PhotoSpot) => void;
-  isCreatingMode: boolean;
 }
 
 export default function MarkersWithClustering({
   spots,
   selectedSpotId,
   hoveredSpotId,
-  onSelectSpot,
-  isCreatingMode
+  onSelectSpot
 }: MarkersWithClusteringProps) {
   const map = useMap();
   const markerLibrary = useMapsLibrary('marker');
@@ -28,11 +26,9 @@ export default function MarkersWithClustering({
 
   // Store callbacks/state in refs so listeners always use latest without needing to recreate markers
   const onSelectSpotRef = useRef(onSelectSpot);
-  const isCreatingModeRef = useRef(isCreatingMode);
   useEffect(() => {
     onSelectSpotRef.current = onSelectSpot;
-    isCreatingModeRef.current = isCreatingMode;
-  }, [onSelectSpot, isCreatingMode]);
+  }, [onSelectSpot]);
 
   // Initialize MarkerClusterer
   useEffect(() => {
@@ -86,8 +82,14 @@ export default function MarkersWithClustering({
             content: pinElement.element,
           });
 
-          marker.addListener('click', () => {
-            if (!isCreatingModeRef.current) onSelectSpotRef.current(spot);
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          marker.addListener('click', (e: any) => {
+            if (e && e.domEvent && typeof e.domEvent.stopPropagation === 'function') {
+              e.domEvent.stopPropagation();
+            } else if (e && typeof e.stop === 'function') {
+              e.stop();
+            }
+            onSelectSpotRef.current(spot);
           });
           
           newMarkers[spot.id] = marker;

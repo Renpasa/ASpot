@@ -41,7 +41,7 @@ Before ≈ 3 Working / 6 Partial / 4 Missing → After ≈ 4 Working (auth, seed
 | Check | Before | After |
 |---|---|---|
 | Backend install/build | PASS (post-generate) | Unchanged PASS |
-| Backend `pnpm test` (default) | 4/8 fail (stale `dist/` doubles) | **4/4 PASS** (1 suite; `dist/` excluded) |
+| Backend `pnpm test` (default) | 4/8 fail (stale `dist/` doubles) | **4/4 PASS** (1 suite; unconditional via `pretest` step) |
 | Frontend lint | Clean | Clean |
 | Frontend build | PASS (75 modules) | PASS (80 modules) |
 | CI on PR head | n/a | Green both jobs |
