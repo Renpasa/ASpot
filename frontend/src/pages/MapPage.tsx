@@ -33,8 +33,23 @@ export default function MapPage() {
   // Creation state
   const [isCreatingMode, setIsCreatingMode] = useState(false);
   const [newSpotLocation, setNewSpotLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [pendingAction, setPendingAction] = useState<'create' | null>(null);
 
   const { user } = useAuth();
+
+  useEffect(() => {
+    if (user && pendingAction === 'create') {
+      setIsCreatingMode(true);
+      setPendingAction(null);
+    }
+  }, [user, pendingAction]);
+
+  useEffect(() => {
+    if (!user && isCreatingMode) {
+      setIsCreatingMode(false);
+      setNewSpotLocation(null);
+    }
+  }, [user, isCreatingMode]);
 
   const loadSpots = useCallback(async () => {
     try {
@@ -75,6 +90,12 @@ export default function MapPage() {
   }, []);
 
   const toggleCreatingMode = () => {
+    if (!user) {
+      setPendingAction('create');
+      setIsAuthModalOpen(true);
+      return;
+    }
+    
     setIsCreatingMode(!isCreatingMode);
     if (!isCreatingMode) {
       // Entering creation mode

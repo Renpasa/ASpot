@@ -19,6 +19,21 @@ api.interceptors.request.use(
   }
 );
 
+// Response interceptor to handle token expiration
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response && (error.response.status === 401 || error.response.status === 403)) {
+      // Clear token to prevent fake-logged-in UI
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      // Dispatch a custom event so the AuthContext can pick it up
+      window.dispatchEvent(new Event('auth:unauthorized'));
+    }
+    return Promise.reject(error);
+  }
+);
+
 export const fetchSpots = async (): Promise<PhotoSpot[]> => {
   const response = await api.get<PhotoSpot[]>('/spots');
   return response.data;
