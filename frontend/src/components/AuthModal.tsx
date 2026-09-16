@@ -43,15 +43,22 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
         onClose();
       } else {
         await api.post('/auth/register', { username, email, password });
-        // Automatically login after register
-        const loginResponse = await api.post('/auth/login', { email, password });
-        login(loginResponse.data.user, loginResponse.data.token);
-        onClose();
+        // Successfully registered
+        try {
+          // Automatically login after register
+          const loginResponse = await api.post('/auth/login', { email, password });
+          login(loginResponse.data.user, loginResponse.data.token);
+          onClose();
+        } catch {
+          // Auto-login failed, but registration succeeded
+          setIsLoginMode(true);
+          setError('Account created, please sign in.');
+        }
       }
     } catch (err: unknown) {
-      const error = err as { response?: { data?: { error?: string } } };
-      if (error.response && error.response.data && error.response.data.error) {
-        setError(error.response.data.error);
+      const errorObj = err as { response?: { data?: { error?: string } } };
+      if (errorObj.response && errorObj.response.data && errorObj.response.data.error) {
+        setError(errorObj.response.data.error);
       } else {
         setError('An unexpected error occurred. Please try again.');
       }

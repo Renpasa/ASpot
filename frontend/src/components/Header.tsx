@@ -42,7 +42,7 @@ export default function Header({ onLoginClick, onAddSpotClick, isCreatingMode }:
           ) : (
             <>
               <button
-                onClick={onLoginClick}
+                onClick={onAddSpotClick}
                 title="Login to add a spot"
                 className="text-sm font-semibold px-4 py-2 rounded-md transition-colors shadow-sm bg-gray-200 text-gray-500 hover:bg-gray-300"
               >
