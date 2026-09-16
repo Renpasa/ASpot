@@ -55,3 +55,28 @@ Human triage decision (2026-09-16): **Bundle B APPROVE · Bundle D APPROVE · Bu
 - Reviewer-silence totals: per-PR rounds 7 silent (first-round `18204222877308629857,4139048637399719971,13078925275102144476,12272474830464733233` + replacements B2 `290052180312065388`/D2 `5311018638449427784`/A2 `1009275715880529514`); delivered per-PR verdicts: 1 (C2 `7810119644038351947` PASS for #21). Integration: 1 PASS (`2273917116698240511` at `1cf6378`). Final-head: 1 silent + 1 PASS. Reviewer sessions total 10; verdicts delivered 3.
 - Worker-delivery debt (unchanged): all 4 worker diffs transported by lead onto PR branches (B `2126810452645194642` pin-revert + lead CI fix `d55e11d`; D `5639755111037489047` scratch `test_interceptor.cjs` excluded; A `9600567646348918887` verbatim; C `15573954101716678106` verbatim). No `Completed`-only delivery counted without a real diff.
 - Chosen merge strategy: **SINGLE canonical merge of PR #22** (supersedes earlier sequential #18→#19→#20→#21 option). Do NOT merge — Renpasa-only. After merge: `POST_MERGE_BASELINE -> NIGHT_WATCH`.
+
+## POST_MERGE_BASELINE (Cycle 1 -> Cycle 2)
+
+- Previous cycle baseline: `3de915b2392da964f316db75d87a8e38a0a68f6a`.
+- Merged canonical PR: #22 (`care-loop/integration-BD` -> `main`), head `a4eba097427ff831354046b3ed5e1953fbe18f97` (= reviewed code `1cf6378` + ledger-only +57).
+- Merge commit: `d28503e13cd0378d79cc268d2e84afbbb502fe78` (merged 2026-09-16T18:26:23Z by Renpasa). Merge diff `a4eba09..d28503e` empty (merge equals branch HEAD).
+- New authoritative main SHA (frozen): `d28503e13cd0378d79cc268d2e84afbbb502fe78` (local `main` == `origin/main`; tracked tree clean after health checks).
+- Closed by merge: issues #14 (B), #15 (D), #16 (A), #17 (C); source PRs #18-#21 remain merged-via-integration (supserseded by #22, not individually merged).
+- P1-P6 status at new baseline (completed/implemented, do NOT re-promote without regression evidence):
+  - P1 (photo-URL rule + backend 400): IMPLEMENTED (`frontend/src/utils/validation.util.ts` + `backend/src/utils/validation.util.ts` mirrored; controller 400s; 6 tests).
+  - P2 (markers visible while creating): IMPLEMENTED (`MapPage.tsx:182` mounted unconditionally + stopPropagation guard).
+  - P3 (auth resilience): IMPLEMENTED (`pendingAction` intent, register-trap copy, 401/403 interceptor + `auth:unauthorized`, logout-exit effect).
+  - P4 (CI runs tests): IMPLEMENTED (`main.yml` `Test` step; CI green on #22 at `a4eba09`).
+  - P5 (JWT fail-fast, no fallback): IMPLEMENTED (FATAL guards; zero `fallback_secret` in src).
+  - P6 (pretest + report footnote): IMPLEMENTED (`pretest: prisma generate`; report footnote present).
+- W1-W5 carried forward UNCHANGED (merge did not materially affect their evidence; re-verified at `d28503e`):
+  - W1 unbounded `/spots` + per-hover marker churn: still `whereClause={}` default; no pagination/virtualization added.
+  - W2 marker->list hover missing: still click-only.
+  - W3 empty state no CTA: still bare `No photo spots available yet.` text.
+  - W4 stale PR11 on phantom base: still OPEN (`test-backend-spots-...` -> `test-backend-spots-...`, non-main base).
+  - W5 keyless Maps visual-validation story: still key-blocked; mock-server proposal unevaluated.
+- Prior adjudication memory (upheld): R1 REJECT (no long-click reverse-geocode requirement in `Agent.md`); C2-5 framing REJECT as framed (generate step was disclosed; residual P6 footnote done).
+- Cycle 1 process debt as learning (NOT active product defects): worker diffs transported by lead (4/4; B pin-revert + lead CI fix `d55e11d`; D scratch excluded); reviewer silence 8 sessions silent / 3 verdict files delivered (C2 per-PR PASS, integration PASS, 2 final-head/ledger PASSes); per-PR #18/#19/#20 verdicts outstanding by design (integration PASS covered composition); PR18 stale-SHA repaired (`32e8004`->`d55e11d` + debt section); single-canonical-merge strategy chosen over sequential rebases.
+- Post-merge health at `d28503e` (lead-run, bounded): backend `pnpm test` 6/6 (prisma cache cleared, no `JWT_SECRET`); `tsc` clean; boot-without-secret `BOOT-REFUSED: FATAL: JWT_SECRET...`; frontend `lint` + `build` clean; CI YAML parses; working tree tracked-clean after artifact removal.
+- Baseline frozen: new Night Watch Cycle 2 runs against `d28503e`. Do NOT rediscover/re-promote P1-P6 without new regression evidence. Night Watch advisory-only.
