@@ -65,7 +65,7 @@ describe('Spot Controller', () => {
     });
 
     it('should return 400 if required fields are missing', async () => {
-      const token = jwt.sign({ id: 1, username: 'testuser' }, process.env.JWT_SECRET || 'fallback_secret');
+      const token = jwt.sign({ id: 1, username: 'testuser' }, process.env.JWT_SECRET as string);
 
       const response = await request(app)
         .post('/api/spots')
@@ -81,7 +81,7 @@ describe('Spot Controller', () => {
     });
 
     it('should return 201 and create a spot if token and valid data are provided', async () => {
-      const token = jwt.sign({ id: 1, username: 'testuser' }, process.env.JWT_SECRET || 'fallback_secret');
+      const token = jwt.sign({ id: 1, username: 'testuser' }, process.env.JWT_SECRET as string);
 
       const mockSpot = {
         id: 1,
