@@ -179,15 +179,12 @@ export default function MapPage() {
             >
               <MapInteractivity selectedSpot={selectedSpot} />
 
-              {!isCreatingMode && (
-                <MarkersWithClustering
-                  spots={spots}
-                  selectedSpotId={selectedSpot?.id || null}
-                  hoveredSpotId={hoveredSpotId}
-                  onSelectSpot={setSelectedSpot}
-                  isCreatingMode={isCreatingMode}
-                />
-              )}
+              <MarkersWithClustering
+                spots={spots}
+                selectedSpotId={selectedSpot?.id || null}
+                hoveredSpotId={hoveredSpotId}
+                onSelectSpot={setSelectedSpot}
+              />
 
               {/* Temporary marker for creation */}
               {isCreatingMode && newSpotLocation && (
