@@ -51,6 +51,14 @@ export default function MapPage() {
     }
   }, [user, isCreatingMode]);
 
+  useEffect(() => {
+    // If the modal was closed, but the user is still not logged in,
+    // they must have dismissed it. Clear the pending intent.
+    if (!isAuthModalOpen && !user && pendingAction) {
+      setPendingAction(null);
+    }
+  }, [isAuthModalOpen, user, pendingAction]);
+
   const loadSpots = useCallback(async () => {
     try {
       setLoading(true);
@@ -164,7 +172,9 @@ export default function MapPage() {
         <div className="w-full h-1/2 md:h-auto md:w-2/3 flex-grow relative">
           {isCreatingMode && (
             <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-10 bg-blue-600 text-white px-6 py-3 rounded-full shadow-lg font-medium pointer-events-none transition-all text-center">
-              Click on the map to select a spot location
+              {newSpotLocation 
+                ? "Location selected. Complete the form to create your spot."
+                : "Click on the map to select a spot location"}
             </div>
           )}
           <APIProvider apiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY || ''}>
