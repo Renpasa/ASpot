@@ -261,3 +261,9 @@ Human triage decision (2026-09-16): **Bundle B APPROVE · Bundle D APPROVE · Bu
 - Lead regression: 15/15 + tsc + lint + build PASS (see baseline block). Scout QA independently reproduced 15-test parity + rule byte-parity.
 - Lead verification: C5-001 chain CONFIRMED (client.ts:26-31 → AuthContext.tsx:63-66 → MapPage.tsx:49-54 → form unmount, draft destroyed, no confirm/persist) — real but frequency-gated on mid-form token expiry → borderline PROMOTE, Human decides PROMOTE vs WATCH. C5-002 DOWNGRADED to WATCH (requires header-cancel inside ~1s POST window). C5-003/C5-004 CONFIRMED low-impact → WATCH. QA items: Q-C4-001/Q-C4-004 stay WATCH (no new evidence), unicode-strip extension = PRODUCT_DECISION, query-control = REJECT-for-promote. Eng items 1-3 latent WATCH (crafted-request-only) + item 4 cosmetic REJECT. Dedup: all new IDs absent from ledger; no carried/REJECT item re-nominated.
 - Advisory for Human: at most ONE borderline candidate (C5-001 auth-expiry draft loss); otherwise NO_HIGH_VALUE_NEW_WORK — a permitted successful outcome this cycle. Zero product code changed, zero PRs, zero issues. Routing: Muse Spark 1.3 + read-only subagents. Paid fallback 0. Cycle 5 at HUMAN_TRIAGE (maturity gate).
+
+## Cycle 5 — Human triage (2026-09-18, authoritative, FINAL)
+
+- Human decision: **C5-001 = WATCH. Do NOT promote.** All other WATCH / PRODUCT_DECISION / REJECT state preserved exactly as recorded.
+- Proving accepted as **`MATURE_WITH_PROCESS_DEBT`**. Proving campaign COMPLETE. Do NOT start Cycle 6. ASpot enters **MAINTENANCE_MODE**.
+- C5-001 joins carried WATCH (auth-expiry creation-draft loss: real chain, frequency-gated, no action unless concrete user-harm evidence appears).
