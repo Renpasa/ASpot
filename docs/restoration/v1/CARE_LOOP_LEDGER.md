@@ -167,3 +167,9 @@ Human triage decision (2026-09-16): **Bundle B APPROVE · Bundle D APPROVE · Bu
 - Issue R1 (P-C3-001 + P-C3-002): creation-flow state correctness — clear stale `pendingAction` on AuthModal dismiss (no forced creation mode on later login) + hide selection banner once a point is picked; one shared creation-state lifecycle/outcome. Number to be filled at creation.
 - Issue R2 (Q-C3-001 + Q-C3-002 + Q-C3-003): input-validation hardening — encoded/trailing-dot URL bypass rejected, non-string title → predictable 400 (never Prisma 500), zero-width/invisible-only title treated as empty; malformed or effectively-empty input fails predictably at the API boundary. Numbers to be filled at creation.
 - Explicitly NOT promoted: P-C3-003 (WATCH), M-C3-004 (WATCH with N5), P-C3-004 (PRODUCT_DECISION/WATCH), Q-C3-004 (WATCH), M-C3-001 (WATCH), M-C3-002 (REJECT standalone), N5/N7/N8/W1–W5 (WATCH), N6 (PRODUCT_DECISION split), all prior REJECTs.
+
+## Cycle 3 Execution log (append-only)
+
+- 2026-09-17: ledger updated with Human triage above. Baseline for execution: `076606fdf697b0ecaa601d43bba85a78ae8292e1` (main, verified; product code = `71d9d47` + docs-only ledger).
+- 2026-09-17: issues created: R1=#28 (P-C3-001+P-C3-002, shared creation-state lifecycle), R2=#29 (Q-C3-001+Q-C3-002+Q-C3-003, one API-boundary outcome; M-C3-004 explicitly excluded).
+- 2026-09-17: workers dispatched (Jules, parallel, non-overlapping surfaces): R1=`13106306070931954992` (branch `care-loop/issue-28-creation-flow`, MapPage-only), R2=`7627928878206241827` (branch `care-loop/issue-29-validation-hardening`, mirrored URL rule + controller + form + tests). Both instructed: rev-parse HEAD check, WIP heartbeat push, commit in-session, push branch + open PR, PR URL as completion proof. Lead polls session status + `gh pr list` + `git ls-remote` (Completed without PR URL = FAILED delivery, lead transports).
