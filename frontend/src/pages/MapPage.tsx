@@ -40,6 +40,8 @@ export default function MapPage() {
   useEffect(() => {
     if (user && pendingAction === 'create') {
       setIsCreatingMode(true);
+      setSelectedSpot(null);
+      setNewSpotLocation(null);
       setPendingAction(null);
     }
   }, [user, pendingAction]);
@@ -111,19 +113,29 @@ export default function MapPage() {
       setNewSpotLocation(null);
     } else {
       // Exiting creation mode
+      setSelectedSpot(null);
       setNewSpotLocation(null);
     }
   };
 
   const handleCreateSpotSubmit = async (data: CreateSpotPayload) => {
-    await createSpot(data);
+    const newSpot = await createSpot(data);
     await loadSpots();
     setIsCreatingMode(false);
     setNewSpotLocation(null);
+    setSelectedSpot(newSpot);
     setShowSuccessToast(true);
     clearTimeout(toastTimeoutRef.current);
     toastTimeoutRef.current = window.setTimeout(() => setShowSuccessToast(false), 3000);
   };
+
+  const handleMarkerClick = useCallback((spot: PhotoSpot) => {
+    if (isCreatingMode) {
+      setNewSpotLocation({ lat: spot.lat, lng: spot.lng });
+    } else {
+      setSelectedSpot(spot);
+    }
+  }, [isCreatingMode]);
 
   return (
     <div className="flex flex-col h-screen w-screen overflow-hidden">
@@ -193,7 +205,7 @@ export default function MapPage() {
                 spots={spots}
                 selectedSpotId={selectedSpot?.id || null}
                 hoveredSpotId={hoveredSpotId}
-                onSelectSpot={setSelectedSpot}
+                onSelectSpot={handleMarkerClick}
               />
 
               {/* Temporary marker for creation */}
