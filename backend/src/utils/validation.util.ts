@@ -18,9 +18,31 @@ export function isValidImageUrl(url: string): boolean {
     const parsed = new URL(url);
     
     let pathname = parsed.pathname;
-    try {
-      pathname = decodeURIComponent(pathname);
-    } catch {
+    let rounds = 0;
+    let isFixpoint = false;
+
+    // Iterative decode to fixpoint, bounded to max 5 rounds
+    while (rounds < 5) {
+      try {
+        const next = decodeURIComponent(pathname);
+        if (next === pathname) {
+          isFixpoint = true;
+          break;
+        }
+        pathname = next;
+        rounds++;
+      } catch {
+        return false;
+      }
+    }
+
+    if (!isFixpoint) {
+      return false;
+    }
+
+    // Reject if pathname or full url contains control characters (U+0000-U+001F, U+007F)
+    // eslint-disable-next-line no-control-regex
+    if (/[\x00-\x1F\x7F]/.test(pathname) || /[\x00-\x1F\x7F]/.test(url)) {
       return false;
     }
     
