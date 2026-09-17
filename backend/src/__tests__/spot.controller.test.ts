@@ -138,22 +138,58 @@ describe('Spot Controller', () => {
       expect(prismaMock.photoSpot.create).not.toHaveBeenCalled();
     });
 
-    it('should return 400 if title is whitespace only', async () => {
+    it('should return 400 if title is not a string (e.g. array, object, number)', async () => {
       const token = jwt.sign({ id: 1, username: 'testuser' }, process.env.JWT_SECRET as string);
 
-      const response = await request(app)
-        .post('/api/spots')
-        .set('Authorization', `Bearer ${token}`)
-        .send({
-          place_id: 'place1',
-          lat: 10,
-          lng: 20,
-          title: '   ',
-          photo_url: 'http://example.com/1.jpg',
-        });
+      const invalidTitles = [
+        ['title1', 'title2'],
+        { key: 'value' },
+        123
+      ];
 
-      expect(response.status).toBe(400);
-      expect(response.body).toHaveProperty('error', 'title cannot be empty or whitespace only');
+      for (const title of invalidTitles) {
+        const response = await request(app)
+          .post('/api/spots')
+          .set('Authorization', `Bearer ${token}`)
+          .send({
+            place_id: 'place1',
+            lat: 10,
+            lng: 20,
+            title,
+            photo_url: 'http://example.com/1.jpg',
+          });
+
+        expect(response.status).toBe(400);
+        expect(response.body).toHaveProperty('error', 'title must be a string');
+      }
+      expect(prismaMock.photoSpot.create).not.toHaveBeenCalled();
+    });
+
+    it('should return 400 if title is whitespace or invisible only', async () => {
+      const token = jwt.sign({ id: 1, username: 'testuser' }, process.env.JWT_SECRET as string);
+
+      const invalidTitles = [
+        '   ',
+        '\u200B\u200B',
+        ' \u200C ',
+        '\uFEFF'
+      ];
+
+      for (const title of invalidTitles) {
+        const response = await request(app)
+          .post('/api/spots')
+          .set('Authorization', `Bearer ${token}`)
+          .send({
+            place_id: 'place1',
+            lat: 10,
+            lng: 20,
+            title,
+            photo_url: 'http://example.com/1.jpg',
+          });
+
+        expect(response.status).toBe(400);
+        expect(response.body).toHaveProperty('error', 'title cannot be empty or whitespace only');
+      }
       expect(prismaMock.photoSpot.create).not.toHaveBeenCalled();
     });
 
@@ -163,7 +199,10 @@ describe('Spot Controller', () => {
       const bypassUrls = [
         'http://example.com/image.php',
         'http://example.com/image.php/',
-        'http://example.com/image.php?image=1.jpg'
+        'http://example.com/image.php?image=1.jpg',
+        'http://example.com/malicious.php%2f',
+        'http://example.com/malicious.php.',
+        'http://example.com/malicious.php%2e'
       ];
 
       for (const url of bypassUrls) {
@@ -294,19 +333,48 @@ describe('Spot Controller', () => {
       expect(prismaMock.photoSpot.update).not.toHaveBeenCalled();
     });
 
-    it('should return 400 if title is whitespace only', async () => {
+    it('should return 400 if title is not a string (e.g. array, object, number)', async () => {
       const token = jwt.sign({ id: 1, username: 'testuser' }, process.env.JWT_SECRET as string);
       prismaMock.photoSpot.findUnique.mockResolvedValue({ id: 1, user_id: 1 } as any);
 
-      const response = await request(app)
-        .put('/api/spots/1')
-        .set('Authorization', `Bearer ${token}`)
-        .send({
-          title: '   ',
-        });
+      const invalidTitles = [
+        ['title1', 'title2'],
+        { key: 'value' },
+        123
+      ];
 
-      expect(response.status).toBe(400);
-      expect(response.body).toHaveProperty('error', 'title cannot be empty or whitespace only');
+      for (const title of invalidTitles) {
+        const response = await request(app)
+          .put('/api/spots/1')
+          .set('Authorization', `Bearer ${token}`)
+          .send({ title });
+
+        expect(response.status).toBe(400);
+        expect(response.body).toHaveProperty('error', 'title must be a string');
+      }
+      expect(prismaMock.photoSpot.update).not.toHaveBeenCalled();
+    });
+
+    it('should return 400 if title is whitespace or invisible only', async () => {
+      const token = jwt.sign({ id: 1, username: 'testuser' }, process.env.JWT_SECRET as string);
+      prismaMock.photoSpot.findUnique.mockResolvedValue({ id: 1, user_id: 1 } as any);
+
+      const invalidTitles = [
+        '   ',
+        '\u200B\u200B',
+        ' \u200C ',
+        '\uFEFF'
+      ];
+
+      for (const title of invalidTitles) {
+        const response = await request(app)
+          .put('/api/spots/1')
+          .set('Authorization', `Bearer ${token}`)
+          .send({ title });
+
+        expect(response.status).toBe(400);
+        expect(response.body).toHaveProperty('error', 'title cannot be empty or whitespace only');
+      }
       expect(prismaMock.photoSpot.update).not.toHaveBeenCalled();
     });
 
