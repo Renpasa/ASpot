@@ -208,6 +208,18 @@ Human triage decision (2026-09-16): **Bundle B APPROVE · Bundle D APPROVE · Bu
 - Extra lead note: Q-C4-002 has concrete ASpot-local harm beyond scout theory — literal control bytes in stored `photo_url` risk downstream/DB rejection (Postgres `text` disallows `\0`) → predictable-400 fix is strictly safer.
 - Process debt this cycle: Maint lane 0/2 (both sessions silent, no verdict files); 1 transient `jules remote list` zlib error (retry succeeded). No product code modified, no PRs, no promotion. Routing: Muse Spark 1.3 + Jules scouts (4 sessions: 2 harvests + 2 silent). Paid fallback 0. Sanitized. Cycle 4 at HUMAN_TRIAGE.
 
+## Cycle 4 — Human triage (2026-09-17, authoritative)
+
+- Human decision: **S1 APPROVE narrowed to P-C4-001+P-C4-002+P-C4-003 as one creation/selection lifecycle outcome. P-C4-004 EXCLUDED (WATCH/separate UX candidate). S2 APPROVE narrowed to Q-C4-002+Q-C4-003 — outcome: normalize hostile/encoded input deterministically and reject control-character/repeated-encoding bypasses before persistence. Q-C4-001 NOT promoted (WATCH pending stronger physical threat evidence; no blanket executable-path policy that may reject legitimate versioned/image paths).**
+- Keep: Q-C4-004 = WATCH; N5/N7/N8/W1–W5 = WATCH; N6 = PRODUCT_DECISION split; P-C3-003 = WATCH; P-C3-004 = PRODUCT_DECISION/WATCH; Q-C3-004 = WATCH; M-C3-001 = WATCH; M-C3-004 tied to N5; all prior REJECT memory unchanged.
+- Autonomy grant: promote approved only → execute → exact-head review → bounded repair → single canonical candidate → EXTERNAL_ACCEPTANCE_READY. No merge (Renpasa-only). Compact Evidence/context-hygiene contract in force (bulky evidence to `.hermes/tmp/agent-evidence/`, Parent compact).
+
+## Cycle 4 Promotion (approved only)
+
+- Issue S1 (P-C4-001+P-C4-002+P-C4-003): creation/selection lifecycle coherence — marker clicks in creating mode must not trap intent; deferred (post-login) creation must reset stale selection; post-create auto-selects/pans the new spot. → **#33**.
+- Issue S2 (Q-C4-002+Q-C4-003): deterministic hostile/encoded-input normalization — iterative percent-decode to fixpoint (bounded) + control-character rejection before persistence, mirrored backend+frontend, tests. → **#34**.
+- Explicitly NOT promoted: P-C4-004 (WATCH/separate), Q-C4-001 (WATCH, threat evidence pending), Q-C4-004 (WATCH), all carried WATCH / PRODUCT_DECISION / REJECT items.
+
 ## Standing contract: ag-env cross-agent Evidence / context-hygiene (adopted 2026-09-17, Human directive)
 
 - Scope: delivery hygiene ONLY. Does NOT change the Repo Care Loop state machine, Human authority, review requirements, or routing (Muse Spark 1.3 + Jules, paid fallback 0, sanitization mandatory).
