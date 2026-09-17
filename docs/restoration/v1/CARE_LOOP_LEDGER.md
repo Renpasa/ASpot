@@ -224,6 +224,8 @@ Human triage decision (2026-09-16): **Bundle B APPROVE · Bundle D APPROVE · Bu
 
 - 2026-09-17: ledger updated with Human triage. Baseline for execution: `58badfd` (main). Issues: S1=#33, S2=#34 (HUMAN-APPROVED narrowed only).
 - 2026-09-17: workers dispatched (Jules, parallel, non-overlapping): S1=`18299759951703283343` (branch `care-loop/issue-33-creation-selection`, frontend MapPage/Markers), S2=`1166694954250258555` (branch `care-loop/issue-34-input-normalization`, mirrored URL rule + tests). Standing instruction: HEAD check, in-session commit, push + PR, PR URL = completion proof. Worker prompts archived at `.hermes/tmp/agent-evidence/cycle4/worker-s*.prompt.md` (local-only, untracked).
+- 2026-09-17: both workers Completed without push/PR (debt pattern). Lead-transported verbatim: S1 `MapPage.tsx` +14/-2 @`ee80c3c` (PR #35, build+lint clean); S2 3 files +84/-9 @`71e28a0` (PR #36, backend 15/15 + tsc + build/lint clean, mirrors byte-identical). Lead checks: `createSpot: Promise<PhotoSpot>` confirmed; pendingAction-effect `setNewSpotLocation(null)` analyzed no-op safeguard (flagged for reviewer). S1 first pull hit transient local ETXTBSY, retry succeeded.
+- 2026-09-17: integration `care-loop/integration-S1S2` from `9f629fa` (merges S1+S2, zero conflicts) @`03cd811` (4 files +98/-11). Lead validation at HEAD: backend 15/15, tsc clean, build+lint clean, forbidden-surface clean. Canonical PR #37 opened (fixes #33+#34). Independent reviewer dispatched: `15082335268533906424` (prompt archived, verdict-file deliverable). No merge. Routing: Muse Spark 1.3 + Jules. Paid 0. Sanitized.
 
 ## Standing contract: ag-env cross-agent Evidence / context-hygiene (adopted 2026-09-17, Human directive)
 
