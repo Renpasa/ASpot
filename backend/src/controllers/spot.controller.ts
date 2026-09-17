@@ -80,7 +80,13 @@ export const createSpot = async (req: AuthRequest, res: Response) => {
       return res.status(400).json({ error: 'lat, lng, title, and photo_url are required' });
     }
 
-    if (typeof title === 'string' && title.trim() === '') {
+    if (typeof title !== 'string') {
+      return res.status(400).json({ error: 'title must be a string' });
+    }
+
+    const strippedTitle = title.replace(/[\u200B-\u200D\uFEFF]/g, '').trim();
+
+    if (strippedTitle === '') {
       return res.status(400).json({ error: 'title cannot be empty or whitespace only' });
     }
 
@@ -104,7 +110,7 @@ export const createSpot = async (req: AuthRequest, res: Response) => {
         place_id,
         lat: parsedLat,
         lng: parsedLng,
-        title: typeof title === 'string' ? title.trim() : title,
+        title: title.trim(),
         photo_url,
         best_time,
         composition_tips,
@@ -160,10 +166,14 @@ export const updateSpot = async (req: AuthRequest, res: Response) => {
       updateData.lng = parsedLng;
     }
     if (title !== undefined) {
-      if (typeof title === 'string' && title.trim() === '') {
+      if (typeof title !== 'string') {
+        return res.status(400).json({ error: 'title must be a string' });
+      }
+      const strippedTitle = title.replace(/[\u200B-\u200D\uFEFF]/g, '').trim();
+      if (strippedTitle === '') {
         return res.status(400).json({ error: 'title cannot be empty or whitespace only' });
       }
-      updateData.title = typeof title === 'string' ? title.trim() : title;
+      updateData.title = title.trim();
     }
     if (photo_url !== undefined) {
       if (!isValidImageUrl(photo_url)) {
