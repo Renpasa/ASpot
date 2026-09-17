@@ -220,6 +220,11 @@ Human triage decision (2026-09-16): **Bundle B APPROVE · Bundle D APPROVE · Bu
 - Issue S2 (Q-C4-002+Q-C4-003): deterministic hostile/encoded-input normalization — iterative percent-decode to fixpoint (bounded) + control-character rejection before persistence, mirrored backend+frontend, tests. → **#34**.
 - Explicitly NOT promoted: P-C4-004 (WATCH/separate), Q-C4-001 (WATCH, threat evidence pending), Q-C4-004 (WATCH), all carried WATCH / PRODUCT_DECISION / REJECT items.
 
+## Cycle 4 Execution log (append-only)
+
+- 2026-09-17: ledger updated with Human triage. Baseline for execution: `58badfd` (main). Issues: S1=#33, S2=#34 (HUMAN-APPROVED narrowed only).
+- 2026-09-17: workers dispatched (Jules, parallel, non-overlapping): S1=`18299759951703283343` (branch `care-loop/issue-33-creation-selection`, frontend MapPage/Markers), S2=`1166694954250258555` (branch `care-loop/issue-34-input-normalization`, mirrored URL rule + tests). Standing instruction: HEAD check, in-session commit, push + PR, PR URL = completion proof. Worker prompts archived at `.hermes/tmp/agent-evidence/cycle4/worker-s*.prompt.md` (local-only, untracked).
+
 ## Standing contract: ag-env cross-agent Evidence / context-hygiene (adopted 2026-09-17, Human directive)
 
 - Scope: delivery hygiene ONLY. Does NOT change the Repo Care Loop state machine, Human authority, review requirements, or routing (Muse Spark 1.3 + Jules, paid fallback 0, sanitization mandatory).
