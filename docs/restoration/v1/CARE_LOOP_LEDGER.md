@@ -152,3 +152,18 @@ Human triage decision (2026-09-16): **Bundle B APPROVE · Bundle D APPROVE · Bu
 - Dedup: all 11 new IDs absent from ledger; M-C3-003 is N6-coverage quantification (stays under N6 PRODUCT_DECISION, no new ID); M-C3-002 folds into next touching diff (no standalone issue); P-C3-003 complements (not repeats) N1.
 - Advisory bundles for Human: R1 = P-C3-001+P-C3-002+P-C3-003 (frontend UX completion, PROMOTE); R2 = Q-C3-001+Q-C3-002+M-C3-004 (backend validation parity, PROMOTE); PRODUCT_DECISION: P-C3-004 (preview), Q-C3-004 (dismiss-during-loading); WATCH: Q-C3-003, M-C3-001, M-C3-002.
 - No product code modified, no PRs, no promotion. Routing: Muse Spark 1.3 + Jules scouts only (4 sessions: 3 harvests + 1 idle-no-delivery). Paid fallback 0. Sanitized. Cycle 3 at HUMAN_TRIAGE.
+
+## Cycle 3 — Human triage (2026-09-17, authoritative)
+
+- Human decision: **R1 APPROVE (P-C3-001 + P-C3-002) as one creation-flow state-correctness issue, conditional: promote together only if implementation evidence confirms they share the same creation-state lifecycle/outcome. R2 APPROVE reframed (Q-C3-001 + Q-C3-002 + Q-C3-003) as one coherent validation outcome: malformed or effectively-empty user input must fail predictably at the API boundary instead of bypassing validation or reaching Prisma. M-C3-004 explicitly EXCLUDED from R2.**
+- SEPARATE/WATCH (do NOT implement): P-C3-003 AuthModal focus trap = WATCH as accessibility opportunity (standalone bounded issue only if truly tiny and isolated); M-C3-004 GET bbox = WATCH with N5 (frontend does not use bbox path; do not promote a dormant API concern to enlarge the bundle); Q-C3-004 dismiss-during-inflight-auth = WATCH unless concrete evidence of user-visible incorrect state, duplicate action, or credential/auth corruption; M-C3-001 rule-mirroring = WATCH as architectural/process risk (no refactor for hypothetical drift).
+- P-C3-004 image preview = PRODUCT_DECISION/WATCH — do NOT implement without product approval.
+- M-C3-002 verbose worker comments = REJECT as standalone implementation work; process/style learning only.
+- Keep: N5/N7/N8/W1–W5 = WATCH; N6 = PRODUCT_DECISION split (unchanged); all previous REJECT/adjudication memory unchanged (R1/A-C1, PR-STATE-MISMATCH, M-C3-003-under-N6).
+- Autonomy grant: ledger → promote approved only → execute → Jules workers with durable delivery evidence → independent exact-head review → bounded repair → single canonical candidate → EXTERNAL_ACCEPTANCE_READY. No merge (Renpasa-only). Routine execution decisions autonomous; return only at genuine Human authority blocker or EXTERNAL_ACCEPTANCE_READY. Routing: Muse Spark 1.3 + Jules only. Paid fallback 0. Public-repo sanitization + exact-head review preserved.
+
+## Cycle 3 Promotion (approved only)
+
+- Issue R1 (P-C3-001 + P-C3-002): creation-flow state correctness — clear stale `pendingAction` on AuthModal dismiss (no forced creation mode on later login) + hide selection banner once a point is picked; one shared creation-state lifecycle/outcome. Number to be filled at creation.
+- Issue R2 (Q-C3-001 + Q-C3-002 + Q-C3-003): input-validation hardening — encoded/trailing-dot URL bypass rejected, non-string title → predictable 400 (never Prisma 500), zero-width/invisible-only title treated as empty; malformed or effectively-empty input fails predictably at the API boundary. Numbers to be filled at creation.
+- Explicitly NOT promoted: P-C3-003 (WATCH), M-C3-004 (WATCH with N5), P-C3-004 (PRODUCT_DECISION/WATCH), Q-C3-004 (WATCH), M-C3-001 (WATCH), M-C3-002 (REJECT standalone), N5/N7/N8/W1–W5 (WATCH), N6 (PRODUCT_DECISION split), all prior REJECTs.
