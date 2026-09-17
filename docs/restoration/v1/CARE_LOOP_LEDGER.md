@@ -140,3 +140,15 @@ Human triage decision (2026-09-16): **Bundle B APPROVE · Bundle D APPROVE · Bu
 
 - Baseline: `71d9d47`. Scouts: Product/UX, QA/Adversarial, Maintainer/Engineering (Jules, read-only; NO product-code modification, NO implementation PRs, NO promotion before Human Triage). Process QA lane on standby (use only if scouting needs it).
 - Rules: deduplicate against this ledger; precision over volume; small number of physically evidenced candidates (file:line) with kind (DEFECT/RISK/OPPORTUNITY/IDEA), confidence/impact/effort/risk, PROMOTE/WATCH/PRODUCT_DECISION/REJECT recommendation, scout provenance. Routing: Muse Spark 1.3 + Jules only, zero paid fallback, sanitized.
+
+## Night Watch Cycle 3 — harvest + lead verification (2026-09-17, advisory-only, NOTHING promoted)
+
+- Lead regression at `cac75e9` (product code = `71d9d47`): backend `pnpm test` **12/12 PASS** + `tsc` clean; frontend `build` + `lint` clean. Scout QA independently reproduced 12/12 PASS. **Regression verdict: PASS** — Q1/N1 live, no regressions.
+- Scouts (Jules, read-only; harvest files pulled durably via `jules remote pull`):
+  - Product/UX `5704129415944771628` → Completed, `harvest-product-ux.md`: P-C3-001..004.
+  - Maintainer/Eng `18292797227389972271` → harvest `harvest-maintainer-eng.md` pulled (session status blank, file delivered): M-C3-001..004.
+  - QA/Adversarial first session `14778220756726253826` → idle 30m+, no harvest (delivery debt pattern again); replacement `16949928640458347565` → Completed, `harvest-qa-adversarial.md`: regression PASS + Q-C3-001..004.
+- Lead physical verification (all confirmed): P-C3-001 (`MapPage.tsx:40-45,92-96,207-210` — `onClose` never clears `pendingAction`, later login forces creation mode; N1×P3 interaction); P-C3-002 (`MapPage.tsx:165-169` banner stays after pick); P-C3-003 (`AuthModal.tsx:95-107` no trap/autofocus); Q-C3-001 (node proof: `.php%2f`→true, `.php.`→true, legit shapes pass); Q-C3-002 (`spot.controller.ts:79-85,107` array title passes guards → Prisma 500); Q-C3-004 (AuthModal dismiss during `loading` unguarded); M-C3-004 (`spot.controller.ts:12-23` GET bbox unchecked; unreachable via app today — frontend never sends bounds, N5-related); P-C3-004 (no preview, `CreateSpotForm.tsx:96-107`).
+- Dedup: all 11 new IDs absent from ledger; M-C3-003 is N6-coverage quantification (stays under N6 PRODUCT_DECISION, no new ID); M-C3-002 folds into next touching diff (no standalone issue); P-C3-003 complements (not repeats) N1.
+- Advisory bundles for Human: R1 = P-C3-001+P-C3-002+P-C3-003 (frontend UX completion, PROMOTE); R2 = Q-C3-001+Q-C3-002+M-C3-004 (backend validation parity, PROMOTE); PRODUCT_DECISION: P-C3-004 (preview), Q-C3-004 (dismiss-during-loading); WATCH: Q-C3-003, M-C3-001, M-C3-002.
+- No product code modified, no PRs, no promotion. Routing: Muse Spark 1.3 + Jules scouts only (4 sessions: 3 harvests + 1 idle-no-delivery). Paid fallback 0. Sanitized. Cycle 3 at HUMAN_TRIAGE.
