@@ -123,3 +123,20 @@ Human triage decision (2026-09-16): **Bundle B APPROVE · Bundle D APPROVE · Bu
 - 2026-09-17: both workers Completed WITHOUT pushing branches or opening PRs (repeat of Cycle 1 debt pattern; `git ls-remote` confirms no `issue-23`/`issue-24` remote branches from workers). Diffs transported by lead via `jules remote pull` (durable file-output: Q1 5 files/329 lines, N1 1 file/46 lines), applied with `git apply --check`, validated, committed, pushed, PRs opened by lead: #25 (Q1 @`b9f3981`, 5 files) + #26 (N1 @`7858491`, 1 file). No worker diff counted without a real pulled diff.
 - 2026-09-17: integration branch `care-loop/integration-Q1N1` built from `12d3e34`: merge Q1 (`a45ad55`) + merge N1 (`41ec137`), zero conflicts (non-overlapping surfaces). Lead validation at integration HEAD: backend `pnpm test` 12/12, `tsc` clean, frontend `build` + `lint` clean. Forbidden-surface check clean (no workflows, no package-lock, no secrets, no migrations, mock Prisma only, pnpm only).
 - Worker-delivery debt (Cycle 2): 2/2 diffs transported by lead (Q1 verbatim incl. verbose comments + trailing-whitespace warnings; N1 verbatim incl. 2 trailing-whitespace warnings). No `Completed`-only delivery counted without a pulled diff.
+- 2026-09-17: independent exact-head review of canonical #27 @`f4948ae` by Jules `7434339470569884410` → **PASS** (all 8 lanes, file:line citations, engineering transcripts: backend 12/12 + tsc, frontend build + lint). Verdict transported verbatim to PR #27 by lead. CI on #27 head green (backend-checks + frontend-checks), MERGEABLE. Repair rounds: 0. Cycle 2 reached EXTERNAL_ACCEPTANCE_READY (no merge by agent).
+
+## POST_MERGE_BASELINE (2026-09-17, after Renpasa merges #27)
+
+- New authoritative `main`: **`71d9d47f1874ae1d057bc5f29b0bf2e341643697`** (merge commit: `Merge pull request #27 from Renpasa/care-loop/integration-Q1N1`, parents `12d3e34` + `f4948ae`, merger Renpasa, 2026-09-17T08:56:47Z). Physically read: `git rev-parse HEAD` = `71d9d47`, first-parent chain intact, 7 files / 268 ins / 17 del in merge.
+- PR #27 recorded: base `12d3e34`, head `f4948ae`, fixes #23 + fixes #24, CI green, independent PASS, MERGED (no agent merge; Renpasa-only).
+- Q1 (N2+N3+N4) + N1: **IMPLEMENTED** at `71d9d47` (backend suite now 12 tests; AuthModal dismiss live).
+- Carried WATCH (merge changes none of their evidence): N5 (bounds wiring), N7 (frontend testless, deferred by design), N8 (Prisma drift), W1-W5.
+- N6 split preserved (PRODUCT_DECISION, NOT a defect): (a) engineering coverage risk for get/update/delete backend routes = test-scope question; (b) edit-delete UI intent = product-intent question. Neither silently convertible to DEFECT.
+- REJECT memory preserved: R1/A-C1 (geocoding, zero basis) + PR-STATE-MISMATCH (GitHub-UI artifact, proven single merge) stay rejected.
+- Worker-delivery debt (Cycles 1+2: Completed-without-push/PR, lead-transported diffs) preserved as PROCESS LEARNING, not an active product defect. Cycle 2 reviewer lane improved (verdict file delivered first try).
+- Cycle 2 CLOSED. Do NOT reopen. Next: NIGHT_WATCH Cycle 3 (advisory-only).
+
+## Night Watch Cycle 3 — dispatch (2026-09-17, advisory-only)
+
+- Baseline: `71d9d47`. Scouts: Product/UX, QA/Adversarial, Maintainer/Engineering (Jules, read-only; NO product-code modification, NO implementation PRs, NO promotion before Human Triage). Process QA lane on standby (use only if scouting needs it).
+- Rules: deduplicate against this ledger; precision over volume; small number of physically evidenced candidates (file:line) with kind (DEFECT/RISK/OPPORTUNITY/IDEA), confidence/impact/effort/risk, PROMOTE/WATCH/PRODUCT_DECISION/REJECT recommendation, scout provenance. Routing: Muse Spark 1.3 + Jules only, zero paid fallback, sanitized.
