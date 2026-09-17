@@ -80,6 +80,20 @@ export const createSpot = async (req: AuthRequest, res: Response) => {
       return res.status(400).json({ error: 'lat, lng, title, and photo_url are required' });
     }
 
+    if (typeof title === 'string' && title.trim() === '') {
+      return res.status(400).json({ error: 'title cannot be empty or whitespace only' });
+    }
+
+    const parsedLat = parseFloat(lat as string);
+    const parsedLng = parseFloat(lng as string);
+
+    if (!Number.isFinite(parsedLat) || parsedLat < -90 || parsedLat > 90) {
+      return res.status(400).json({ error: 'Invalid latitude' });
+    }
+    if (!Number.isFinite(parsedLng) || parsedLng < -180 || parsedLng > 180) {
+      return res.status(400).json({ error: 'Invalid longitude' });
+    }
+
     if (!isValidImageUrl(photo_url)) {
       return res.status(400).json({ error: 'Please provide a valid image URL (must start with http/https and not be a non-image file type).' });
     }
@@ -88,9 +102,9 @@ export const createSpot = async (req: AuthRequest, res: Response) => {
       data: {
         user_id: userId,
         place_id,
-        lat: parseFloat(lat),
-        lng: parseFloat(lng),
-        title,
+        lat: parsedLat,
+        lng: parsedLng,
+        title: typeof title === 'string' ? title.trim() : title,
         photo_url,
         best_time,
         composition_tips,
@@ -131,9 +145,26 @@ export const updateSpot = async (req: AuthRequest, res: Response) => {
 
     const updateData: any = {};
     if (place_id !== undefined) updateData.place_id = place_id;
-    if (lat !== undefined) updateData.lat = parseFloat(lat);
-    if (lng !== undefined) updateData.lng = parseFloat(lng);
-    if (title !== undefined) updateData.title = title;
+    if (lat !== undefined) {
+      const parsedLat = parseFloat(lat as string);
+      if (!Number.isFinite(parsedLat) || parsedLat < -90 || parsedLat > 90) {
+        return res.status(400).json({ error: 'Invalid latitude' });
+      }
+      updateData.lat = parsedLat;
+    }
+    if (lng !== undefined) {
+      const parsedLng = parseFloat(lng as string);
+      if (!Number.isFinite(parsedLng) || parsedLng < -180 || parsedLng > 180) {
+        return res.status(400).json({ error: 'Invalid longitude' });
+      }
+      updateData.lng = parsedLng;
+    }
+    if (title !== undefined) {
+      if (typeof title === 'string' && title.trim() === '') {
+        return res.status(400).json({ error: 'title cannot be empty or whitespace only' });
+      }
+      updateData.title = typeof title === 'string' ? title.trim() : title;
+    }
     if (photo_url !== undefined) {
       if (!isValidImageUrl(photo_url)) {
         return res.status(400).json({ error: 'Please provide a valid image URL (must start with http/https and not be a non-image file type).' });

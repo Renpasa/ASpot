@@ -109,6 +109,80 @@ describe('Spot Controller', () => {
       expect(prismaMock.photoSpot.create).not.toHaveBeenCalled();
     });
 
+    it('should return 400 if lat or lng are invalid or out of range', async () => {
+      const token = jwt.sign({ id: 1, username: 'testuser' }, process.env.JWT_SECRET as string);
+
+      const invalidCoords = [
+        { lat: 'NaN', lng: 20 },
+        { lat: 10, lng: 'Infinity' },
+        { lat: 91, lng: 20 }, // out of range lat
+        { lat: -91, lng: 20 },
+        { lat: 10, lng: 181 }, // out of range lng
+        { lat: 10, lng: -181 },
+      ];
+
+      for (const coords of invalidCoords) {
+        const response = await request(app)
+          .post('/api/spots')
+          .set('Authorization', `Bearer ${token}`)
+          .send({
+            place_id: 'place1',
+            lat: coords.lat,
+            lng: coords.lng,
+            title: 'New Spot',
+            photo_url: 'http://example.com/1.jpg',
+          });
+
+        expect(response.status).toBe(400);
+      }
+      expect(prismaMock.photoSpot.create).not.toHaveBeenCalled();
+    });
+
+    it('should return 400 if title is whitespace only', async () => {
+      const token = jwt.sign({ id: 1, username: 'testuser' }, process.env.JWT_SECRET as string);
+
+      const response = await request(app)
+        .post('/api/spots')
+        .set('Authorization', `Bearer ${token}`)
+        .send({
+          place_id: 'place1',
+          lat: 10,
+          lng: 20,
+          title: '   ',
+          photo_url: 'http://example.com/1.jpg',
+        });
+
+      expect(response.status).toBe(400);
+      expect(response.body).toHaveProperty('error', 'title cannot be empty or whitespace only');
+      expect(prismaMock.photoSpot.create).not.toHaveBeenCalled();
+    });
+
+    it('should return 400 if photo_url is a bypass URL (e.g., .php, .php/)', async () => {
+      const token = jwt.sign({ id: 1, username: 'testuser' }, process.env.JWT_SECRET as string);
+
+      const bypassUrls = [
+        'http://example.com/image.php',
+        'http://example.com/image.php/',
+        'http://example.com/image.php?image=1.jpg'
+      ];
+
+      for (const url of bypassUrls) {
+        const response = await request(app)
+          .post('/api/spots')
+          .set('Authorization', `Bearer ${token}`)
+          .send({
+            place_id: 'place1',
+            lat: 10,
+            lng: 20,
+            title: 'New Spot',
+            photo_url: url,
+          });
+
+        expect(response.status).toBe(400);
+      }
+      expect(prismaMock.photoSpot.create).not.toHaveBeenCalled();
+    });
+
     it('should return 201 and create a spot if token and valid data are provided (including seed/fallback URL shapes)', async () => {
       const token = jwt.sign({ id: 1, username: 'testuser' }, process.env.JWT_SECRET as string);
 
@@ -189,6 +263,73 @@ describe('Spot Controller', () => {
       expect(response.body.lng).toBe(20);
       expect(response.body.photo_url).toBe('http://example.com/1.jpg');
       expect(prismaMock.photoSpot.create).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('PUT /api/spots/:id', () => {
+    it('should return 400 if lat or lng are invalid or out of range', async () => {
+      const token = jwt.sign({ id: 1, username: 'testuser' }, process.env.JWT_SECRET as string);
+
+      const invalidCoords = [
+        { lat: 'NaN', lng: 20 },
+        { lat: 10, lng: 'Infinity' },
+        { lat: 91, lng: 20 }, // out of range lat
+        { lat: -91, lng: 20 },
+        { lat: 10, lng: 181 }, // out of range lng
+        { lat: 10, lng: -181 },
+      ];
+
+      for (const coords of invalidCoords) {
+        prismaMock.photoSpot.findUnique.mockResolvedValueOnce({ id: 1, user_id: 1 } as any);
+        const response = await request(app)
+          .put('/api/spots/1')
+          .set('Authorization', `Bearer ${token}`)
+          .send({
+            lat: coords.lat,
+            lng: coords.lng,
+          });
+
+        expect(response.status).toBe(400);
+      }
+      expect(prismaMock.photoSpot.update).not.toHaveBeenCalled();
+    });
+
+    it('should return 400 if title is whitespace only', async () => {
+      const token = jwt.sign({ id: 1, username: 'testuser' }, process.env.JWT_SECRET as string);
+      prismaMock.photoSpot.findUnique.mockResolvedValue({ id: 1, user_id: 1 } as any);
+
+      const response = await request(app)
+        .put('/api/spots/1')
+        .set('Authorization', `Bearer ${token}`)
+        .send({
+          title: '   ',
+        });
+
+      expect(response.status).toBe(400);
+      expect(response.body).toHaveProperty('error', 'title cannot be empty or whitespace only');
+      expect(prismaMock.photoSpot.update).not.toHaveBeenCalled();
+    });
+
+    it('should return 400 if photo_url is a bypass URL', async () => {
+      const token = jwt.sign({ id: 1, username: 'testuser' }, process.env.JWT_SECRET as string);
+      prismaMock.photoSpot.findUnique.mockResolvedValue({ id: 1, user_id: 1 } as any);
+
+      const bypassUrls = [
+        'http://example.com/image.php',
+        'http://example.com/image.php/',
+      ];
+
+      for (const url of bypassUrls) {
+        const response = await request(app)
+          .put('/api/spots/1')
+          .set('Authorization', `Bearer ${token}`)
+          .send({
+            photo_url: url,
+          });
+
+        expect(response.status).toBe(400);
+      }
+      expect(prismaMock.photoSpot.update).not.toHaveBeenCalled();
     });
   });
 });
