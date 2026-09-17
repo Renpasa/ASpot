@@ -31,7 +31,9 @@ export default function CreateSpotForm({
       return;
     }
 
-    if (!title.trim()) {
+    const strippedTitle = title.replace(/[\u200B-\u200D\uFEFF]/g, '').trim();
+
+    if (!strippedTitle) {
       setError('Title cannot be empty or whitespace only.');
       return;
     }
