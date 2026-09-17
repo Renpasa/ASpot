@@ -64,6 +64,34 @@ describe('Spot Controller', () => {
       expect(prismaMock.photoSpot.create).not.toHaveBeenCalled();
     });
 
+    it('should return 400 if photo_url contains control characters', async () => {
+      const token = jwt.sign({ id: 1, username: 'testuser' }, process.env.JWT_SECRET as string);
+
+      const bypassUrls = [
+        'http://example.com/image.jpg%00',
+        'http://example.com/image.jpg\x00',
+        'http://example.com/image.jpg\x1F',
+        'http://example.com/image.jpg%7F',
+        'http://example.com/image%00.jpg',
+      ];
+
+      for (const url of bypassUrls) {
+        const response = await request(app)
+          .post('/api/spots')
+          .set('Authorization', `Bearer ${token}`)
+          .send({
+            place_id: 'place1',
+            lat: 10,
+            lng: 20,
+            title: 'New Spot',
+            photo_url: url,
+          });
+
+        expect(response.status).toBe(400);
+      }
+      expect(prismaMock.photoSpot.create).not.toHaveBeenCalled();
+    });
+
     it('should return 400 if required fields are missing', async () => {
       const token = jwt.sign({ id: 1, username: 'testuser' }, process.env.JWT_SECRET as string);
 
@@ -193,7 +221,7 @@ describe('Spot Controller', () => {
       expect(prismaMock.photoSpot.create).not.toHaveBeenCalled();
     });
 
-    it('should return 400 if photo_url is a bypass URL (e.g., .php, .php/)', async () => {
+    it('should return 400 if photo_url is a bypass URL (e.g., .php, .php/, double-encoded)', async () => {
       const token = jwt.sign({ id: 1, username: 'testuser' }, process.env.JWT_SECRET as string);
 
       const bypassUrls = [
@@ -202,7 +230,8 @@ describe('Spot Controller', () => {
         'http://example.com/image.php?image=1.jpg',
         'http://example.com/malicious.php%2f',
         'http://example.com/malicious.php.',
-        'http://example.com/malicious.php%2e'
+        'http://example.com/malicious.php%2e',
+        'http://example.com/malicious.php%252e' // Double encoded .
       ];
 
       for (const url of bypassUrls) {
@@ -229,7 +258,9 @@ describe('Spot Controller', () => {
         'http://example.com/1.jpg',
         'https://images.unsplash.com/photo-1543884849-0abcb65c1973?auto=format&fit=crop&q=80&w=300&h=200',
         'https://picsum.photos/seed/123/600/400',
-        'https://example.com/image.png#fragment'
+        'https://example.com/image.png#fragment',
+        'http://example.com/v1.2/image.jpg',
+        'http://example.com/photo%20name.jpg'
       ];
 
       for (let i = 0; i < validUrls.length; i++) {
