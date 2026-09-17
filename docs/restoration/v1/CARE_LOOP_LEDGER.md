@@ -189,3 +189,8 @@ Human triage decision (2026-09-16): **Bundle B APPROVE · Bundle D APPROVE · Bu
 - REJECT memory preserved: R1/A-C1 (geocoding), PR-STATE-MISMATCH (GitHub-UI artifact), M-C3-002 (standalone work rejected; style learning only), M-C3-003-under-N6 (no new ID).
 - Worker/reviewer debt (Cycles 1–3) preserved as PROCESS LEARNING: Completed-without-push/PR (2/2 Cycle 3 workers, lead-transported), reviewer silence (3 silent Jules rounds Cycle 3; blind same-model fallback used once, reported as degraded route, exact-head review NOT relaxed).
 - Cycle 3 CLOSED. Do NOT reopen. Next: NIGHT_WATCH Cycle 4 (advisory-only).
+
+## Night Watch Cycle 4 — dispatch (2026-09-17, advisory-only)
+
+- Baseline: `85cf70d` (product code; ledger head `1ef46bb`). Scouts: Product/UX `2509571418404998578`, QA/Adversarial `1341431914185152425`, Maintainer/Engineering `8764238007668950740` (Jules, read-only; NO product-code modification, NO implementation PRs, NO promotion before Human Triage). Process QA lane on standby (no concrete process-risk reason this cycle).
+- Rules: deduplicate against this ledger; precision over volume (max 4/lane, file:line, kind/C-I-E-R, PROMOTE/WATCH/PRODUCT_DECISION/REJECT, scout provenance); hunt interactions with R1/R2 first; no generic refactor/dependency noise. Routing: Muse Spark 1.3 + Jules only, zero paid fallback, sanitized.
