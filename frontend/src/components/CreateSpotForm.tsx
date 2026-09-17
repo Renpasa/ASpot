@@ -31,8 +31,13 @@ export default function CreateSpotForm({
       return;
     }
 
-    if (!title.trim() || !photoUrl.trim()) {
-      setError('Title and Photo URL are required.');
+    if (!title.trim()) {
+      setError('Title cannot be empty or whitespace only.');
+      return;
+    }
+    
+    if (!photoUrl.trim()) {
+      setError('Photo URL is required.');
       return;
     }
 
@@ -46,7 +51,7 @@ export default function CreateSpotForm({
       await onSubmit({
         lat: initialLat as number,
         lng: initialLng as number,
-        title,
+        title: title.trim(),
         photo_url: photoUrl,
         best_time: bestTime || undefined,
         composition_tips: compositionTips || undefined,
