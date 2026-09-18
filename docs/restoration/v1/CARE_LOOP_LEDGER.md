@@ -297,3 +297,18 @@ Human triage decision (2026-09-16): **Bundle B APPROVE · Bundle D APPROVE · Bu
 - Physical validation: `git fetch` + `git ls-remote` show `origin/main` == local `ca54466` (M1 close). No new merge commit, no HEAD movement, no product-file drift. Signal does NOT match the WAITING_TRIGGER gate trigger (a) — nothing merged is observable in ASpot.
 - Action taken: NONE beyond validation. No M2 started (would be a rescan of the unchanged HEAD, explicitly forbidden). Lifecycle remains **WAITING_TRIGGER**. No product code touched, no other repository touched.
 - Autonomy evidence: compact signals = 3; signal-validation worked as designed (no blind transition on unmatched signal); returned at genuine Human authority blocker per contract.
+
+## MAINTENANCE CYCLE M2 — idle-state routing objective (L3 correction, 2026-09-18)
+- L3: no pending implementation/worker/PR/merge/drift; M1 done. Parent selects next work; no Human task-choice requested.
+- Rejected as objectives (churn): re-running broad Night Watch over unchanged HEAD; re-evaluating carried WATCH with zero new evidence (R2 precedent already settles the 500→400 class; M1-W1 is lower-frequency within it); UX-completion cosmetics (M1-W2/W3, below bar by inspection).
+- Selected M2 objective: **dependency/runtime drift audit (read-only)** — `npm audit` on prod dependency surfaces + runtime/engine alignment. Distinct from M1 because M1 examined first-party code surfaces only (controller/components/middleware/CI triggers); dependencies were never audited in proving Cycles 1–5 or M1, so the audit produces genuinely new information. Promotion bar: only a critical/high prod *runtime-reachable* finding with demonstrated impact clears it; dev-only or unreachable findings → WATCH/REJECT.
+- Lifecycle: **MAINTENANCE M2** (bounded discovery, advisory-only; no implementation before Human Triage).
+
+## MAINTENANCE CYCLE M2 — harvest + lead verification (advisory-only, at HUMAN_TRIAGE)
+
+- Method: `pnpm audit --prod` + `pnpm outdated` + lockfile reads, both surfaces. Evidence: `.hermes/tmp/agent-evidence/m2/dep-drift-audit.md`. Zero files modified.
+- Backend (prod, runtime-reachable via express on every request): path-to-regexp@0.1.12 HIGH ReDoS (patched >=0.1.13); qs@6.14.2 moderate-DoS x3 (patched >=6.15.2/>=6.16.0), reachable via unauthenticated `getSpots` query parsing; body-parser@1.20.4 low (patched >=1.20.6). Express locked at 4.22.1 (latest 4.x) yet still pulls all vulnerable transitives → in-range bump does NOT fix.
+- Frontend: axios@1.13.6 multiple HIGHs (proto-pollution, credential leak, MitM, ReDoS) + lows, runtime-reachable (all API traffic via `client.ts`); fix 1.20.0 available IN-RANGE (`^1.13.6`), lockfile-only, low risk. Build-chain HIGHs (postcss/autoprefixer/tailwind/browserslist/nanoid) are build-time only → WATCH.
+- Promotion-grade (meet M2 bar): **M2-P1** frontend axios bump 1.13.6→1.20.0 (in-range, low risk); **M2-P2** backend express-transitive remediation (needs pnpm overrides or express 5 migration — approach for Human judgment). WATCH: build-chain-only findings.
+- Outcome: **M2 HAS PROMOTION CANDIDATES** (first since proving). No implementation before triage; no PRs, no merges. Routing: Muse Spark 1.3 direct (no subagents needed — bounded single-surface audit). Paid fallback 0. M2 at HUMAN_TRIAGE.
+- Autonomy evidence (pilot, cumulative): bespoke prompts = 2 (charter + L3); compact signals = 4 (charter-implicit, M1 triage, MERGED, L3-implicit); MERGED-validation + L3-routing both executed without new bespoke prompting; no message-bus use; no incorrect transition; no stale-state use; returns only at by-design triage + 1 genuine blocker; M2 objective parent-selected from durable state, distinct from M1.
