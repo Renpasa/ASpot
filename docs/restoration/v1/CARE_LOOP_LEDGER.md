@@ -290,3 +290,10 @@ Human triage decision (2026-09-16): **Bundle B APPROVE · Bundle D APPROVE · Bu
 - All existing WATCH / PRODUCT_DECISION / REJECT adjudications preserved unchanged (Cycles 1–5 + closeout + C5-001).
 - Standing lifecycle: **WAITING_TRIGGER**. Next valid triggers for M2: (a) new Human-merged product change on main; (b) meaningful repository drift (origin/main moves, product files change); (c) explicit Human maintenance trigger (compact signal); (d) future authorized scheduler/webhook wake event. Do NOT rescan the unchanged HEAD to keep the loop busy.
 - Autonomy evidence (pilot, M1 full loop): bespoke prompts = 1 (charter); compact signals = 2 (M1 start implicit in charter + this triage); state reconstructed correctly after each signal; no message-bus use; no incorrect transition; no stale-state use; one necessary HUMAN_TRIAGE return (by design), zero unnecessary interruptions; process-debt recovery: scouts 3/3 delivered, no replacements needed.
+
+## MERGED signal received (2026-09-18) — validation FAILED, no transition
+
+- Human signal: `MERGED` (standing contract: resolve actual new HEAD, auto-start M2).
+- Physical validation: `git fetch` + `git ls-remote` show `origin/main` == local `ca54466` (M1 close). No new merge commit, no HEAD movement, no product-file drift. Signal does NOT match the WAITING_TRIGGER gate trigger (a) — nothing merged is observable in ASpot.
+- Action taken: NONE beyond validation. No M2 started (would be a rescan of the unchanged HEAD, explicitly forbidden). Lifecycle remains **WAITING_TRIGGER**. No product code touched, no other repository touched.
+- Autonomy evidence: compact signals = 3; signal-validation worked as designed (no blind transition on unmatched signal); returned at genuine Human authority blocker per contract.
