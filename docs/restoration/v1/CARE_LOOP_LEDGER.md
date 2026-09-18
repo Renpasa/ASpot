@@ -267,3 +267,18 @@ Human triage decision (2026-09-16): **Bundle B APPROVE · Bundle D APPROVE · Bu
 - Human decision: **C5-001 = WATCH. Do NOT promote.** All other WATCH / PRODUCT_DECISION / REJECT state preserved exactly as recorded.
 - Proving accepted as **`MATURE_WITH_PROCESS_DEBT`**. Proving campaign COMPLETE. Do NOT start Cycle 6. ASpot enters **MAINTENANCE_MODE**.
 - C5-001 joins carried WATCH (auth-expiry creation-draft loss: real chain, frequency-gated, no action unless concrete user-harm evidence appears).
+
+## MAINTENANCE CYCLE M1 — baseline (AUTONOMOUS_CARE_LOOP_PILOT, 2026-09-18)
+
+- Campaign charter: operate from durable state; Human input only at authority gates; no bespoke per-phase prompts. Proving Cycles 1–5 NOT reopened.
+- State reconstructed from repo: authoritative main `bd25799` == `origin/main` (no drift); product code = `80975d9` (`80975d9..bd25799` docs-only, 2 files); last Human decision = Cycle 5 triage (C5-001 WATCH, MATURE_WITH_PROCESS_DEBT, MAINTENANCE_MODE). Active approved issues: none. Canonical candidate: none.
+- Regression at M1 baseline (lead-run): backend 15/15 + tsc; frontend lint + build; zero `fallback_secret`; mirrors byte-identical. **PASS.**
+- Autonomy evidence (pilot counters): bespoke Human orchestration prompts = 1 (charter); compact authority signals = 0; state reconstructed correctly (HEAD match, docs-only delta confirmed); no message-bus use; no incorrect transition; no stale-state use; no unnecessary interruption.
+
+## MAINTENANCE CYCLE M1 — harvest + lead verification (advisory-only, NOTHING promoted)
+
+- Scouts (read-only subagents, reports `.hermes/tmp/agent-evidence/m1/`): Product/UX, QA/Adversarial, Maintainer/Eng — all 3 DELIVERED, all 3 verdict **NO_HIGH_VALUE_NEW_WORK**. Zero scout silence (recovery vs proving debt).
+- QA regression independently reproduced: 15/15 pins + mirror parity + node probes (multi-encoding/mixed-case/trailing-dot/control-path REJECT, legit ALLOW). S2 holds, no drift since Cycle 5.
+- New WATCH-grade (lead-verified, below PROMOTE bar): optional-field non-string → Prisma 500 (crafted-only; `spot.controller.ts:107-118`); SpotList onError loop without guard (`SpotList.tsx:60-67`); post-create card missing author until reload (no `include:{user}` on create); malformed-JSON HTML error (`app.ts:9`); CI builds PRs only, never post-merge main (`main.yml:3-6`, process hygiene).
+- REJECT-for-promote: stale same-id marker (dormant, tied to N6 PRODUCT_DECISION); query-control policy (unchanged). Carried WATCH / PRODUCT_DECISION / REJECT otherwise untouched; dedup clean (all new IDs absent from ledger).
+- Outcome: **NO_HIGH_VALUE_NEW_WORK** (unanimous). Zero product code changed, zero PRs, zero issues. Routing: Muse Spark 1.3 + read-only subagents. Paid fallback 0. M1 at HUMAN_TRIAGE.
