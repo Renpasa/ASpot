@@ -312,3 +312,12 @@ Human triage decision (2026-09-16): **Bundle B APPROVE · Bundle D APPROVE · Bu
 - Promotion-grade (meet M2 bar): **M2-P1** frontend axios bump 1.13.6→1.20.0 (in-range, low risk); **M2-P2** backend express-transitive remediation (needs pnpm overrides or express 5 migration — approach for Human judgment). WATCH: build-chain-only findings.
 - Outcome: **M2 HAS PROMOTION CANDIDATES** (first since proving). No implementation before triage; no PRs, no merges. Routing: Muse Spark 1.3 direct (no subagents needed — bounded single-surface audit). Paid fallback 0. M2 at HUMAN_TRIAGE.
 - Autonomy evidence (pilot, cumulative): bespoke prompts = 2 (charter + L3); compact signals = 4 (charter-implicit, M1 triage, MERGED, L3-implicit); MERGED-validation + L3-routing both executed without new bespoke prompting; no message-bus use; no incorrect transition; no stale-state use; returns only at by-design triage + 1 genuine blocker; M2 objective parent-selected from durable state, distinct from M1.
+
+## MAINTENANCE CYCLE M2 — M2-P1 implementation (APPROVED at triage, 2026-09-18)
+
+- Human decision: **APPROVE M2-P1**; M2-P2 = WATCH/DEFER (no overrides-vs-Express-5 choice without separate architecture decision); build-chain findings stay WATCH.
+- Implementation: issue #38; branch `care-loop/m2-p1-axios-bump` commit `239b129`; `frontend/package.json` axios `^1.13.6`→`^1.20.0` + lockfile closure (follow-redirects, form-data, proxy-from-env v1→v2 Node-path only). Repair rounds: 0.
+- Validation: frontend build + eslint clean; backend 15/15 + tsc clean; `pnpm audit --prod` 41→11, 0 axios findings, 7 remaining HIGHs confirmed build-chain-only (postcss/nanoid/browserslist, not runtime-reachable).
+- Independent review: PASS_WITH_NOTES (closure churn expected; note: postcss toolchain sits in `dependencies` though build-time-only → folded to WATCH as process hygiene).
+- Transport: **PR #39 → main (EXTERNAL_ACCEPTANCE_READY, NOT merged — awaiting Human MERGED signal).** Post-merge: M3 baseline will resolve the new HEAD.
+- New WATCH: build-toolchain-in-prod-deps hygiene (reviewer note 2). All other adjudications preserved.
