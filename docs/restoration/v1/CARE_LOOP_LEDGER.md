@@ -321,3 +321,25 @@ Human triage decision (2026-09-16): **Bundle B APPROVE · Bundle D APPROVE · Bu
 - Independent review: PASS_WITH_NOTES (closure churn expected; note: postcss toolchain sits in `dependencies` though build-time-only → folded to WATCH as process hygiene).
 - Transport: **PR #39 → main (EXTERNAL_ACCEPTANCE_READY, NOT merged — awaiting Human MERGED signal).** Post-merge: M3 baseline will resolve the new HEAD.
 - New WATCH: build-toolchain-in-prod-deps hygiene (reviewer note 2). All other adjudications preserved.
+
+## POST_MERGE_BASELINE M2 (2026-09-21, after Renpasa merges #39)
+
+- New authoritative `main`: **`362184eababd06d10c5a1c373f950ab4bcc53bc6`** (merge commit: `Merge pull request #39 from Renpasa/care-loop/m2-p1-axios-bump`, parents `665ed58` + `239b129`, merger Renpasa, 2026-09-20T15:48:41Z). Physically read: local `main` fast-forwarded to `origin/main`, tracked tree clean (4 pre-existing untracked docs + `.hermes/` only).
+- Merge scope verified: `665ed58..362184e` = exactly 2 approved M2-P1 files (`frontend/package.json` axios `^1.20.0` + lockfile closure); merge equals reviewed code. PR #39 recorded: fixes #38, independent PASS_WITH_NOTES, MERGED (Renpasa-only). Issue #38 CLOSED by merge.
+- M2-P1 (axios 1.13.6→1.20.0): **IMPLEMENTED** at `362184e` (lockfile pins axios@1.20.0; `pnpm audit --prod` 0 axios findings, 11 remaining confirmed build-chain-only postcss-selector-parser family, not runtime-reachable).
+- Regression at new baseline (lead-run): backend `pnpm test` **15/15 PASS** + `tsc` clean; frontend `lint` + `build` clean; zero `fallback_secret` in src; validation mirrors byte-identical. **Regression verdict: PASS — Cycles 1–4 + M2-P1 intact, no regressions.**
+- Backend `pnpm audit --prod` at baseline: 5 vulns (1 low / 3 moderate / 1 high) — the already-triaged M2-P2 express-transitive surface; unchanged by this merge, still WATCH/DEFER pending Human architecture decision. No new evidence.
+- Cycle 1–4 + M2-P1 implemented outcomes (frozen, do NOT re-promote without regression evidence): P1-P6 + Q1/N1 + R1/R2 + S1/S2 + M2-P1 (axios bump).
+- Carried WATCH (merge changes none of their evidence): M2-P2 (express transitives, DEFER), build-chain findings + build-toolchain-in-prod-deps hygiene, N5/N7/N8, W1–W5, M1-W1..W5, P-C3-003, P-C3-004 (PRODUCT_DECISION), Q-C3-004, M-C3-001, P-C4-004, Q-C4-001, Q-C4-004, C5-001.
+- N6 split preserved (PRODUCT_DECISION, NOT a defect). REJECT memory preserved: R1/A-C1 (geocoding), PR-STATE-MISMATCH (artifact), M-C3-002 (standalone), Q-C4-002-query-control policy.
+- Maintenance Cycle M2 CLOSED. Next: L3 idle-state routing at `362184e`.
+
+## MAINTENANCE CYCLE M3 — L3 idle-state routing (2026-09-21, at `362184e`)
+
+- L3: no pending implementation/worker/PR/merge/drift; M2 done and merged. Parent selects next work; no Human task-choice requested.
+- Rejected as objectives (churn): re-running broad Night Watch over the just-merged HEAD (only 2 M2-P1 files changed, both reviewed); re-evaluating carried WATCH with zero new evidence; M2-P2 express-transitive remediation (already DEFER, needs Human architecture decision — not parent-selectable).
+- Selected M3 objective: **secrets/config hygiene sweep (read-only)** — hardcoded-secret grep over both `src/` trees + `.env.example`/`docker-compose.yml`/env-var reads. Distinct from M1 (first-party logic) and M2 (dependency audit); secrets surface never audited in proving Cycles 1–5 or M1–M2, so the sweep produces genuinely new information. Promotion bar: only a live hardcoded credential or secret-leak path clears it. Zero files modified.
+- Also verified: all `care-loop/*` remote branches fully merged into `main` (`--merged` lists 16/16, incl. `m2-p1-axios-bump`); sole unmerged branch `test-backend-spots-...-18357058630661729886` = already-carried W4 phantom base, unchanged. No unique unmerged work; no cleanup taken (Human-authorized only per Cycle 2 triage).
+- Sweep outcome: **NO_HIGH_VALUE_NEW_WORK.** All 8 grep matches legitimate (env-var reads `VITE_API_BASE_URL`/`VITE_GOOGLE_MAPS_API_KEY`, JWT fail-fast guards, test fixtures, route wiring); `.env.example` files placeholder-only; `docker-compose.yml` `POSTGRES_PASSWORD=mysecretpassword` is a pre-existing local-dev default, below bar → folded to carried WATCH as M3-W1.
+- Lifecycle: **IDLE_NO_JUSTIFIED_NEXT_OBJECTIVE.** No further distinct bounded objective is justified at `362184e` without new drift, new merge, or Human trigger. Standing WAITING_TRIGGER gates (a–d per M1 triage) remain armed.
+- Routing: Muse Spark 1.3 direct (no subagents needed — bounded single-surface sweep). Paid fallback 0. Sanitized.
