@@ -359,3 +359,7 @@ Human triage decision (2026-09-16): **Bundle B APPROVE · Bundle D APPROVE · Bu
 - Validation: backend `pnpm test` 15/15 + `tsc` clean; frontend eslint clean + `vite build` clean (lead-run). `git ls-files | grep vite/deps` empty; `check-ignore` maps cache paths to `.gitignore:13`.
 - Independent review: PASS at exact `ea349ee` (read-only reviewer: 4 in-scope files only, README claims verified true, no ceremony, no CI/product-code touch).
 - Transport: **PR #40 -> main (EXTERNAL_ACCEPTANCE_READY, NOT merged - Human-only).** Pushed `main` to `273b4fe` (M4 ledger entry) + work branch; no merge by agent.
+- Reconciliation (2026-09-22, precheck: PR #40 `ea349ee` vs advanced `main` `c973882` diverged): rebased work branch onto `c973882`, force-pushed. New canonical head `122bb32` (base now `c973882`; scope diff 4 files, M4-T1/T2 only, LICENSE untouched, no ceremony).
+- Re-validation at `60ca199`: backend 15/15 + tsc clean; frontend lint + build clean. Independent review PASS_WITH_NOTES at exact `60ca199` (note: README Prisma path `prisma/schema.prisma` wrong at repo root).
+- Bounded repair round 1: README path -> `backend/prisma/schema.prisma`, amended to `122bb32`, force-pushed. Patch re-check PASS at exact `122bb32` (1-line delta only; corrected path confirmed in tree; prior verdict carries).
+- Transport: **PR #40 at `122bb32` -> main (EXTERNAL_ACCEPTANCE_READY, NOT merged - Human-only).** Repair rounds: 1.
