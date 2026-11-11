@@ -115,14 +115,24 @@ async function metrics(cdp) {
   return evaluate(cdp, `(() => { const h=document.querySelector('header'), hr=h.getBoundingClientRect(); return {headerWidth:h.scrollWidth, docWidth:document.documentElement.scrollWidth, headerRect:{top:hr.top,bottom:hr.bottom}, buttons:[...h.querySelectorAll('button')].filter(b=>b.getClientRects().length).map(b=>({text:b.textContent.trim(),...(()=>{const r=b.getBoundingClientRect();return {left:r.left,right:r.right,top:r.top,bottom:r.bottom,width:r.width}})()})), welcome:[...h.querySelectorAll('span')].find(s=>s.textContent.includes('Welcome'))?.getBoundingClientRect().width||0, lowerLeft:h.nextElementSibling.querySelector('div').getBoundingClientRect().left }; })()`);
 }
 
+function collect(checks, condition, message) {
+  if (!condition) checks.push(message);
+}
+
+function assertCollected(checks) {
+  assert.deepEqual(checks, [], checks.join('\n'));
+}
+
 test('mobile and desktop logged-in header fits viewport', async (t) => {
   const mobile = await startBrowser(390, 844);
   t.after(() => mobile.close());
   await login(mobile);
   let m = await metrics(mobile.cdp);
-  assert.ok(m.headerWidth <= 390, `AC-1 mobile logged-in header scrollWidth ${m.headerWidth} > 390`);
-  assert.ok(m.docWidth <= 390, `AC-1 document scrollWidth ${m.docWidth} > 390`);
-  for (const button of m.buttons) assert.ok(button.left >= 0 && button.right <= 390 && button.top >= m.headerRect.top && button.bottom <= m.headerRect.bottom, `AC-1 ${button.text} clipped: ${JSON.stringify(button)}`);
+  const failures = [];
+  collect(failures, m.headerWidth <= 390, `AC-1 mobile logged-in header scrollWidth ${m.headerWidth} > 390`);
+  collect(failures, m.docWidth <= 390, `AC-1 document scrollWidth ${m.docWidth} > 390`);
+  for (const button of m.buttons) collect(failures, button.left >= 0 && button.right <= 390 && button.top >= m.headerRect.top && button.bottom <= m.headerRect.bottom, `AC-1 ${button.text} clipped: ${JSON.stringify(button)}`);
+  assertCollected(failures);
 
 });
 
@@ -132,10 +142,12 @@ test('AC-2 mobile creation header fits viewport', async (t) => {
   await login(mobile);
   await evaluate(mobile.cdp, `[...document.querySelectorAll('button')].find(b=>b.textContent.trim()==='Add Spot').click()`);
   let m = await metrics(mobile.cdp);
-  assert.ok(m.headerWidth <= 390, `AC-2 header scrollWidth ${m.headerWidth} > 390`);
-  assert.ok(m.docWidth <= 390, `AC-2 document scrollWidth ${m.docWidth} > 390`);
-  for (const text of ['Cancel Add Spot', 'Logout']) { const b=m.buttons.find(x=>x.text===text); assert.ok(b && b.left>=0 && b.right<=390 && b.top>=m.headerRect.top && b.bottom<=m.headerRect.bottom, `AC-2 ${text} clipped: ${JSON.stringify(b)}`); }
-  assert.ok(m.lowerLeft >= 0, `AC-2 lower pane left ${m.lowerLeft} < 0`);
+  const failures = [];
+  collect(failures, m.headerWidth <= 390, `AC-2 header scrollWidth ${m.headerWidth} > 390`);
+  collect(failures, m.docWidth <= 390, `AC-2 document scrollWidth ${m.docWidth} > 390`);
+  for (const text of ['Cancel Add Spot', 'Logout']) { const b=m.buttons.find(x=>x.text===text); collect(failures, b && b.left>=0 && b.right<=390 && b.top>=m.headerRect.top && b.bottom<=m.headerRect.bottom, `AC-2 ${text} clipped: ${JSON.stringify(b)}`); }
+  collect(failures, m.lowerLeft >= 0, `AC-2 lower pane left ${m.lowerLeft} < 0`);
+  assertCollected(failures);
 
 });
 
@@ -147,9 +159,11 @@ test('AC-3 long username mobile header fits viewport', async (t) => {
   await delay(700);
   await evaluate(long.cdp, `[...document.querySelectorAll('button')].find(b=>b.textContent.trim()==='Add Spot').click()`);
   m = await metrics(long.cdp);
-  assert.ok(m.headerWidth <= 390, `AC-3 header scrollWidth ${m.headerWidth} > 390`);
+  const failures = [];
+  collect(failures, m.headerWidth <= 390, `AC-3 header scrollWidth ${m.headerWidth} > 390`);
   const logout=m.buttons.find(b=>b.text==='Logout');
-  assert.ok(logout && logout.width>30 && logout.right<=390, `AC-3 Logout clipped: ${JSON.stringify(logout)}`);
+  collect(failures, logout && logout.width>30 && logout.right<=390, `AC-3 Logout clipped: ${JSON.stringify(logout)}`);
+  assertCollected(failures);
 
 });
 
