@@ -174,11 +174,13 @@ test('AC-4 desktop logged-in and mobile logged-out headers fit viewport', async 
   const desktop = await startBrowser(1440, 900); opened.push(desktop);
   await login(desktop);
   m=await metrics(desktop.cdp);
-  assert.ok(m.headerWidth<=1440, `AC-4 desktop header scrollWidth ${m.headerWidth} > 1440`);
-  assert.ok(m.welcome>0, 'AC-4 Welcome, testuser is not visible');
-  for(const button of m.buttons) assert.ok(button.left>=0 && button.right<=1440, `AC-4 ${button.text} clipped`);
+  const failures = [];
+  collect(failures, m.headerWidth<=1440, `AC-4 desktop header scrollWidth ${m.headerWidth} > 1440`);
+  collect(failures, m.welcome>0, 'AC-4 Welcome, testuser is not visible');
+  for(const button of m.buttons) collect(failures, button.left>=0 && button.right<=1440, `AC-4 ${button.text} clipped`);
 
   const loggedOut=await startBrowser(390,844); opened.push(loggedOut);
   m=await metrics(loggedOut.cdp);
-  assert.ok(m.headerWidth<=390, `AC-4 logged-out mobile header scrollWidth ${m.headerWidth} > 390`);
+  collect(failures, m.headerWidth<=390, `AC-4 logged-out mobile header scrollWidth ${m.headerWidth} > 390`);
+  assertCollected(failures);
 });
