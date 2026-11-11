@@ -112,7 +112,7 @@ async function login(browser, username = 'testuser') {
 }
 
 async function metrics(cdp) {
-  return evaluate(cdp, `(() => { const h=document.querySelector('header'), hr=h.getBoundingClientRect(); return {headerWidth:h.scrollWidth, docWidth:document.documentElement.scrollWidth, headerRect:{top:hr.top,bottom:hr.bottom}, buttons:[...h.querySelectorAll('button')].filter(b=>b.getClientRects().length).map(b=>({text:b.textContent.trim(),...(()=>{const r=b.getBoundingClientRect();return {left:r.left,right:r.right,top:r.top,bottom:r.bottom,width:r.width}})()})), welcome:[...h.querySelectorAll('span')].find(s=>s.textContent.includes('Welcome'))?.getBoundingClientRect().width||0, lowerLeft:h.nextElementSibling.querySelector('div').getBoundingClientRect().left }; })()`);
+  return evaluate(cdp, `(() => { const h=document.querySelector('header'), hr=h.getBoundingClientRect(), w=[...h.querySelectorAll('span')].find(s=>s.textContent.includes('Welcome')); return {headerWidth:h.scrollWidth, docWidth:document.documentElement.scrollWidth, headerRect:{top:hr.top,bottom:hr.bottom}, buttons:[...h.querySelectorAll('button')].filter(b=>b.getClientRects().length).map(b=>({text:b.textContent.trim(),...(()=>{const r=b.getBoundingClientRect();return {left:r.left,right:r.right,top:r.top,bottom:r.bottom,width:r.width,height:r.height}})()})), welcome:w?(()=>{const r=w.getBoundingClientRect();return {width:r.width,scrollWidth:w.scrollWidth,clientWidth:w.clientWidth,text:w.textContent.trim()}})():null, lowerLeft:h.nextElementSibling.querySelector('div').getBoundingClientRect().left }; })()`);
 }
 
 function collect(checks, condition, message) {
@@ -146,7 +146,7 @@ test('AC-2 mobile creation header fits viewport', async (t) => {
   collect(failures, m.headerWidth <= 390, `AC-2 header scrollWidth ${m.headerWidth} > 390`);
   collect(failures, m.docWidth <= 390, `AC-2 document scrollWidth ${m.docWidth} > 390`);
   for (const text of ['Cancel Add Spot', 'Logout']) { const b=m.buttons.find(x=>x.text===text); collect(failures, b && b.left>=0 && b.right<=390 && b.top>=m.headerRect.top && b.bottom<=m.headerRect.bottom, `AC-2 ${text} clipped: ${JSON.stringify(b)}`); }
-  collect(failures, m.lowerLeft >= 0, `AC-2 lower pane left ${m.lowerLeft} < 0`);
+  assert.strictEqual(m.lowerLeft, 0, `AC-2 lower pane left ${m.lowerLeft} !== 0`);
   assertCollected(failures);
 
 });
@@ -162,8 +162,14 @@ test('AC-3 long username mobile header fits viewport', async (t) => {
   const failures = [];
   collect(failures, m.headerWidth <= 390, `AC-3 header scrollWidth ${m.headerWidth} > 390`);
   const logout=m.buttons.find(b=>b.text==='Logout');
-  collect(failures, logout && logout.width>30 && logout.right<=390, `AC-3 Logout clipped: ${JSON.stringify(logout)}`);
+  collect(failures, logout && logout.left>=0 && logout.right<=390 && logout.top>=m.headerRect.top && logout.bottom<=m.headerRect.bottom && logout.width>30, `AC-3 Logout clipped: ${JSON.stringify(logout)}`);
   assertCollected(failures);
+  const cx=logout.left+logout.width/2, cy=logout.top+(logout.bottom-logout.top)/2;
+  await long.cdp.send('Input.dispatchMouseEvent', {type:'mousePressed', x:cx, y:cy, button:'left', clickCount:1});
+  await long.cdp.send('Input.dispatchMouseEvent', {type:'mouseReleased', x:cx, y:cy, button:'left', clickCount:1});
+  let loggedOut=false;
+  for(let i=0;i<50;i++) { loggedOut=await evaluate(long.cdp, `!![...document.querySelectorAll('button')].find(b=>b.textContent.trim()==='Login / Register') && ![...document.querySelectorAll('button')].find(b=>b.textContent.trim()==='Logout')`); if(loggedOut) break; await delay(100); }
+  assert.ok(loggedOut, 'AC-3 clicking Logout returns to logged-out state');
 
 });
 
@@ -184,7 +190,7 @@ test('AC-4 desktop logged-in and mobile logged-out headers fit viewport', async 
   m=await metrics(desktop.cdp);
   collect(failures, m.headerWidth<=1440, `AC-4 desktop header scrollWidth ${m.headerWidth} > 1440`);
   collect(failures, m.docWidth<=1440, `AC-4 desktop document scrollWidth ${m.docWidth} > 1440`);
-  collect(failures, m.welcome>0, 'AC-4 Welcome, testuser is not visible');
+  collect(failures, m.welcome && m.welcome.width>0 && m.welcome.text==='Welcome, testuser' && m.welcome.scrollWidth<=m.welcome.clientWidth, `AC-4 complete untruncated greeting missing: ${JSON.stringify(m.welcome)}`);
   for(const button of m.buttons) collect(failures, button.left>=0 && button.right<=1440, `AC-4 ${button.text} clipped`);
 
   const loggedOut=await startBrowser(390,844); opened.push(loggedOut);

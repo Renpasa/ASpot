@@ -91,7 +91,7 @@
       <table>
         <thead><tr><th>審查面向</th><th>狀態</th><th>實測依據</th></tr></thead>
         <tbody>
-          <tr><td><strong>Spec fidelity</strong></td><td><span class="proof">PASS</span></td><td>覆蓋 AC-1 至 AC-4：AC-4 涵蓋桌機 1440x900 登出與登入狀態，以及手機 390x844 登出狀態；手機一般登入、新增模式與長帳號亦涵蓋。</td></tr>
+          <tr><td><strong>Spec fidelity</strong></td><td><span class="proof">PASS</span></td><td>覆蓋 AC-1 至 AC-4：AC-2 精確驗證 <code>listPane left === 0</code>；AC-3 驗證 Logout 完整位於頂欄與視窗邊界內，並實際點擊登出；AC-4 在桌機 1440x900 驗證完整且未截斷的 <code>Welcome, testuser</code>，並涵蓋桌機登出與手機 390x844 登出狀態。</td></tr>
           <tr><td><strong>Standards / policy</strong></td><td><span class="proof">PASS</span></td><td>僅用 pnpm、未新增套件、保留無障礙讀屏文字、PR 僅引用 #12 不自動關閉。</td></tr>
           <tr><td><strong>Blast radius</strong></td><td><span class="proof">LOW</span></td><td>只調整單一元件響應式類別與新增一個獨立前端測試檔；後端與地圖交互邏輯零異動。</td></tr>
           <tr><td><strong>Deterministic checks</strong></td><td><span class="proof">PASS</span></td><td>先測 <code>AC-1/2/3 RED</code>（寬度 424/440/496），修復後 <code>4/4 PASS</code>、lint 0 錯、Vite build 成功、後端 <code>15/15 PASS</code> + tsc 清潔。</td></tr>
@@ -113,9 +113,9 @@
       <h2>Git Commit 與政策依據</h2>
       <ol class="source-list">
         <li>Base <code>main</code>：<code>3be9e6177935c997a9c7cbda44f064f0adf9678a</code></li>
-        <li>T0 RED 測試 Commit：<code>e677adf31608eca8608fca138ed21c4c929efecb</code>（僅新增 <code>frontend/tests/mobile-header.test.mjs</code>）</li>
+        <li>T0 RED 初始測試 Commit：<code>f6bf6943e7ab885536d49af6480d11d1d07185fc</code>（pre-fix 測試微調至 <code>e677adf31608eca8608fca138ed21c4c929efecb</code>）</li>
         <li>T1 GREEN 修復 Commit：<code>21d195ba283cc7f4264f551c5b9442ce67d92072</code>（僅修改 <code>frontend/src/components/Header.tsx</code>）</li>
-        <li>Round 1 修復：補足 AC-4 桌機 1440x900 登出狀態的頂欄及按鈕範圍覆蓋。</li>
+        <li>Repair R1：<code>ba7a013a11141ed64eb888aca08a1e789bffcadd</code>（加上 R2 嚴格斷言修正）</li>
         <li>GitHub：Issue <a href="https://github.com/Renpasa/ASpot/issues/12">#12</a>、Draft PR <a href="https://github.com/Renpasa/ASpot/pull/42">#42</a>、Shared MA Goal <a href="https://github.com/Renpasa/ag-environment-config/issues/202#issuecomment-6734507890">#202</a></li>
       </ol>
     </div>
