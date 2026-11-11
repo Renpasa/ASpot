@@ -172,15 +172,24 @@ test('AC-4 desktop logged-in and mobile logged-out headers fit viewport', async 
   let m;
   t.after(async () => { for (const browser of opened) await browser.close(); });
   const desktop = await startBrowser(1440, 900); opened.push(desktop);
-  await login(desktop);
   m=await metrics(desktop.cdp);
   const failures = [];
+  collect(failures, m.headerWidth<=1440, `AC-4 logged-out desktop header scrollWidth ${m.headerWidth} > 1440`);
+  collect(failures, m.docWidth<=1440, `AC-4 logged-out desktop document scrollWidth ${m.docWidth} > 1440`);
+  for(const text of ['Add Spot', 'Login / Register']) {
+    const button=m.buttons.find((item)=>item.text===text);
+    collect(failures, button && button.left>=0 && button.right<=1440 && button.top>=m.headerRect.top && button.bottom<=m.headerRect.bottom, `AC-4 logged-out desktop ${text} outside header/viewport: ${JSON.stringify(button)}`);
+  }
+  await login(desktop);
+  m=await metrics(desktop.cdp);
   collect(failures, m.headerWidth<=1440, `AC-4 desktop header scrollWidth ${m.headerWidth} > 1440`);
+  collect(failures, m.docWidth<=1440, `AC-4 desktop document scrollWidth ${m.docWidth} > 1440`);
   collect(failures, m.welcome>0, 'AC-4 Welcome, testuser is not visible');
   for(const button of m.buttons) collect(failures, button.left>=0 && button.right<=1440, `AC-4 ${button.text} clipped`);
 
   const loggedOut=await startBrowser(390,844); opened.push(loggedOut);
   m=await metrics(loggedOut.cdp);
   collect(failures, m.headerWidth<=390, `AC-4 logged-out mobile header scrollWidth ${m.headerWidth} > 390`);
+  collect(failures, m.docWidth<=390, `AC-4 logged-out mobile document scrollWidth ${m.docWidth} > 390`);
   assertCollected(failures);
 });
