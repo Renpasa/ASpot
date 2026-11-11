@@ -56,11 +56,11 @@ async function cdpSocket(url) {
 
 async function startBrowser(width, height) {
   const dir = await mkdtemp(path.join(tmpdir(), 'mobile-header-'));
-  const preview = spawn('pnpm', ['exec', 'vite', 'preview', '--port', '0', '--host', '127.0.0.1'], { cwd: frontendDir, stdio: ['ignore', 'pipe', 'pipe'] });
+  const preview = spawn('pnpm', ['exec', 'vite', 'preview', '--port', '0', '--host', '127.0.0.1'], { cwd: frontendDir, stdio: ['ignore', 'pipe', 'pipe'], detached: true });
   let chrome;
   try {
     const origin = await waitForPreview(preview);
-    chrome = spawn(await chromiumPath(), ['--headless=new', '--no-sandbox', '--disable-gpu', '--remote-debugging-port=0', `--user-data-dir=${dir}`, `--window-size=${width},${height}`, 'about:blank'], { stdio: ['ignore', 'ignore', 'ignore'] });
+    chrome = spawn(await chromiumPath(), ['--headless=new', '--no-sandbox', '--disable-gpu', '--remote-debugging-port=0', `--user-data-dir=${dir}`, `--window-size=${width},${height}`, 'about:blank'], { stdio: ['ignore', 'ignore', 'ignore'], detached: true });
     let address = '';
     const devtoolsFile = path.join(dir, 'DevToolsActivePort');
     for (let i = 0; i < 100; i++) {
@@ -92,9 +92,9 @@ async function startBrowser(width, height) {
     await cdp.send('Page.enable');
     await cdp.send('Page.navigate', { url: origin });
     await delay(800);
-    return { cdp, origin, async close() { cdp.ws.close(); chrome.kill('SIGTERM'); preview.kill('SIGTERM'); preview.stdout.destroy(); preview.stderr.destroy(); setTimeout(() => { chrome.kill('SIGKILL'); preview.kill('SIGKILL'); }, 1000).unref(); await rm(dir, { recursive: true, force: true }); } };
+    return { cdp, origin, async close() { cdp.ws.close(); preview.stdout.destroy(); preview.stderr.destroy(); for (const child of [chrome, preview]) { try { process.kill(-child.pid, 'SIGTERM'); } catch {} } await Promise.all([chrome, preview].map((child) => new Promise((resolve) => { if (child.exitCode !== null) return resolve(); const timer = setTimeout(() => { try { process.kill(-child.pid, 'SIGKILL'); } catch {} resolve(); }, 1000); child.once('exit', () => { clearTimeout(timer); resolve(); }); }))); await rm(dir, { recursive: true, force: true }); } };
   } catch (error) {
-    chrome?.kill('SIGTERM'); preview.kill('SIGTERM'); preview.stdout.destroy(); preview.stderr.destroy(); setTimeout(() => { chrome?.kill('SIGKILL'); preview.kill('SIGKILL'); }, 1000).unref(); await rm(dir, { recursive: true, force: true }); throw error;
+    preview.stdout.destroy(); preview.stderr.destroy(); for (const child of [chrome, preview]) { if (child) { try { process.kill(-child.pid, 'SIGTERM'); } catch {} } } await rm(dir, { recursive: true, force: true }); throw error;
   }
 }
 
