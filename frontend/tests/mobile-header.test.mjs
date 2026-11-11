@@ -92,9 +92,9 @@ async function startBrowser(width, height) {
     await cdp.send('Page.enable');
     await cdp.send('Page.navigate', { url: origin });
     await delay(800);
-    return { cdp, origin, async close() { cdp.ws.close(); chrome.kill('SIGTERM'); preview.kill('SIGTERM'); await rm(dir, { recursive: true, force: true }); } };
+    return { cdp, origin, async close() { cdp.ws.close(); chrome.kill('SIGTERM'); preview.kill('SIGTERM'); preview.stdout.destroy(); preview.stderr.destroy(); setTimeout(() => { chrome.kill('SIGKILL'); preview.kill('SIGKILL'); }, 1000).unref(); await rm(dir, { recursive: true, force: true }); } };
   } catch (error) {
-    chrome?.kill('SIGTERM'); preview.kill('SIGTERM'); await rm(dir, { recursive: true, force: true }); throw error;
+    chrome?.kill('SIGTERM'); preview.kill('SIGTERM'); preview.stdout.destroy(); preview.stderr.destroy(); setTimeout(() => { chrome?.kill('SIGKILL'); preview.kill('SIGKILL'); }, 1000).unref(); await rm(dir, { recursive: true, force: true }); throw error;
   }
 }
 
@@ -106,7 +106,7 @@ async function evaluate(cdp, expression) {
 
 async function login(browser, username = 'testuser') {
   await evaluate(browser.cdp, `document.querySelector('button') && [...document.querySelectorAll('button')].find(b => b.textContent.trim() === 'Login / Register').click()`);
-  await evaluate(browser.cdp, `document.querySelector('input[type=email]').value = '${username === 'testuser' ? 'test@example.com' : 'coolphotographer@example.com'}'; document.querySelector('input[type=email]').dispatchEvent(new Event('input',{bubbles:true})); document.querySelector('input[type=password]').value='password'; document.querySelector('input[type=password]').dispatchEvent(new Event('input',{bubbles:true})); document.querySelector('form').requestSubmit()`);
+  await evaluate(browser.cdp, `(() => { const set=Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set; const email=document.querySelector('input[type=email]'), password=document.querySelector('input[type=password]'); set.call(email,'${username === 'testuser' ? 'test@example.com' : 'coolphotographer@example.com'}'); email.dispatchEvent(new Event('input',{bubbles:true})); set.call(password,'password'); password.dispatchEvent(new Event('input',{bubbles:true})); document.querySelector('form').requestSubmit(); })()`);
   for (let i = 0; i < 50; i++) { if (await evaluate(browser.cdp, `!![...document.querySelectorAll('button')].find(b => b.textContent.trim() === 'Logout')`)) return; await delay(100); }
   throw new Error('Login did not complete');
 }
@@ -116,23 +116,33 @@ async function metrics(cdp) {
 }
 
 test('mobile and desktop logged-in header fits viewport', async (t) => {
-  const opened = [];
-  t.after(async () => { for (const browser of opened) await browser.close(); });
-  const mobile = await startBrowser(390, 844); opened.push(mobile);
+  const mobile = await startBrowser(390, 844);
+  t.after(() => mobile.close());
   await login(mobile);
   let m = await metrics(mobile.cdp);
   assert.ok(m.headerWidth <= 390, `AC-1 mobile logged-in header scrollWidth ${m.headerWidth} > 390`);
   assert.ok(m.docWidth <= 390, `AC-1 document scrollWidth ${m.docWidth} > 390`);
   for (const button of m.buttons) assert.ok(button.left >= 0 && button.right <= 390 && button.top >= m.headerRect.top && button.bottom <= m.headerRect.bottom, `AC-1 ${button.text} clipped: ${JSON.stringify(button)}`);
 
+});
+
+test('AC-2 mobile creation header fits viewport', async (t) => {
+  const mobile = await startBrowser(390, 844);
+  t.after(() => mobile.close());
+  await login(mobile);
   await evaluate(mobile.cdp, `[...document.querySelectorAll('button')].find(b=>b.textContent.trim()==='Add Spot').click()`);
-  m = await metrics(mobile.cdp);
+  let m = await metrics(mobile.cdp);
   assert.ok(m.headerWidth <= 390, `AC-2 header scrollWidth ${m.headerWidth} > 390`);
   assert.ok(m.docWidth <= 390, `AC-2 document scrollWidth ${m.docWidth} > 390`);
   for (const text of ['Cancel Add Spot', 'Logout']) { const b=m.buttons.find(x=>x.text===text); assert.ok(b && b.left>=0 && b.right<=390 && b.top>=m.headerRect.top && b.bottom<=m.headerRect.bottom, `AC-2 ${text} clipped: ${JSON.stringify(b)}`); }
   assert.ok(m.lowerLeft >= 0, `AC-2 lower pane left ${m.lowerLeft} < 0`);
 
-  const long = await startBrowser(390, 844); opened.push(long);
+});
+
+test('AC-3 long username mobile header fits viewport', async (t) => {
+  const long = await startBrowser(390, 844);
+  t.after(() => long.close());
+  let m;
   await evaluate(long.cdp, `localStorage.setItem('token','test-jwt'); localStorage.setItem('user',JSON.stringify({id:1,username:'coolphotographer',email:'test@example.com'})); location.reload()`);
   await delay(700);
   await evaluate(long.cdp, `[...document.querySelectorAll('button')].find(b=>b.textContent.trim()==='Add Spot').click()`);
@@ -141,6 +151,12 @@ test('mobile and desktop logged-in header fits viewport', async (t) => {
   const logout=m.buttons.find(b=>b.text==='Logout');
   assert.ok(logout && logout.width>30 && logout.right<=390, `AC-3 Logout clipped: ${JSON.stringify(logout)}`);
 
+});
+
+test('AC-4 desktop logged-in and mobile logged-out headers fit viewport', async (t) => {
+  const opened = [];
+  let m;
+  t.after(async () => { for (const browser of opened) await browser.close(); });
   const desktop = await startBrowser(1440, 900); opened.push(desktop);
   await login(desktop);
   m=await metrics(desktop.cdp);
