@@ -173,7 +173,11 @@ export default function MapPage() {
               {!loading && !error && (
                 <>
                   {selectedSpot && (
-                    <SpotDetailPanel spot={selectedSpot} onClear={() => setSelectedSpot(null)} />
+                    <SpotDetailPanel
+                      key={selectedSpot.id}
+                      spot={selectedSpot}
+                      onClear={() => setSelectedSpot(null)}
+                    />
                   )}
                   <SpotList
                     spots={spots}

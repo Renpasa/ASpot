@@ -1,3 +1,4 @@
+import { useRef, useState } from 'react';
 import type { PhotoSpot } from '../types';
 
 interface Props {
@@ -14,13 +15,16 @@ interface Props {
  * photo, notes, and coordinates in one readable block above the list.
  */
 export default function SpotDetailPanel({ spot, onClear }: Props) {
-  const imageUrl = spot.photo_url || `https://picsum.photos/seed/${spot.id}/1200/800`;
+  const fallbackUrl = `https://picsum.photos/seed/${spot.id}/1200/800`;
+  const [imageSrc, setImageSrc] = useState(spot.photo_url || fallbackUrl);
+  // One fallback attempt only: retrying a failing fallback would loop forever.
+  const fallbackAttempted = useRef(false);
 
   return (
     <section
       data-testid="spot-detail-panel"
       aria-label={`Selected spot: ${spot.title}`}
-      className="border-b border-gray-200 bg-white"
+      className="sticky top-0 z-10 border-b border-gray-200 bg-white"
     >
       <div className="flex items-start justify-between gap-3 px-4 pt-4">
         <h3 data-testid="spot-detail-title" className="text-lg font-semibold text-gray-900">
@@ -37,11 +41,14 @@ export default function SpotDetailPanel({ spot, onClear }: Props) {
       </div>
 
       <img
-        src={imageUrl}
+        src={imageSrc}
         alt={spot.title}
         className="mt-3 max-h-56 w-full object-cover"
-        onError={(event) => {
-          (event.target as HTMLImageElement).src = `https://picsum.photos/seed/${spot.id}/1200/800`;
+        onError={() => {
+          if (!fallbackAttempted.current && imageSrc !== fallbackUrl) {
+            fallbackAttempted.current = true;
+            setImageSrc(fallbackUrl);
+          }
         }}
       />
 
