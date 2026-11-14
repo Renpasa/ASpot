@@ -1,4 +1,3 @@
-import { useEffect, useRef } from 'react';
 import type { PhotoSpot } from '../types';
 
 interface Props {
@@ -10,16 +9,8 @@ interface Props {
 }
 
 export default function SpotList({ spots, selectedSpot, onSelectSpot, hoveredSpotId, onHoverSpot }: Props) {
-  const cardRefs = useRef<Record<number, HTMLDivElement | null>>({});
-
-  useEffect(() => {
-    if (selectedSpot && cardRefs.current[selectedSpot.id]) {
-      cardRefs.current[selectedSpot.id]?.scrollIntoView({
-        behavior: 'smooth',
-        block: 'nearest',
-      });
-    }
-  }, [selectedSpot]);
+  // Selection reveal is owned by the detail panel; keeping a second
+  // scroll-into-view here raced with it and hid the panel.
   if (spots.length === 0) {
     return <div className="p-8 text-center text-gray-500">No photo spots available yet.</div>;
   }
@@ -27,7 +18,9 @@ export default function SpotList({ spots, selectedSpot, onSelectSpot, hoveredSpo
   return (
     <div className="p-4">
       <h2 className="text-2xl font-bold mb-4 text-gray-800 break-inside-avoid">Photo Spots</h2>
-      <div className="columns-1 sm:columns-2 xl:columns-3 gap-4">
+      {/* Column width, not viewport breakpoints: the sidebar is ~1/3 of the
+          viewport, so xl:columns-3 produced ~138px cards at 1440x900. */}
+      <div className="columns-[190px] gap-4">
       {spots.map(spot => {
         const isSelected = selectedSpot?.id === spot.id;
         const isHovered = hoveredSpotId === spot.id;
@@ -36,7 +29,6 @@ export default function SpotList({ spots, selectedSpot, onSelectSpot, hoveredSpo
         return (
           <div
             key={spot.id}
-            ref={el => { cardRefs.current[spot.id] = el; }}
             onClick={() => onSelectSpot(spot)}
             onKeyDown={(e) => {
               if (e.key === 'Enter' || e.key === ' ') {
