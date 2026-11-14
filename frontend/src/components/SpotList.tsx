@@ -27,7 +27,9 @@ export default function SpotList({ spots, selectedSpot, onSelectSpot, hoveredSpo
   return (
     <div className="p-4">
       <h2 className="text-2xl font-bold mb-4 text-gray-800 break-inside-avoid">Photo Spots</h2>
-      <div className="columns-1 sm:columns-2 xl:columns-3 gap-4">
+      {/* Column width, not viewport breakpoints: the sidebar is ~1/3 of the
+          viewport, so xl:columns-3 produced ~138px cards at 1440x900. */}
+      <div className="columns-[190px] gap-4">
       {spots.map(spot => {
         const isSelected = selectedSpot?.id === spot.id;
         const isHovered = hoveredSpotId === spot.id;

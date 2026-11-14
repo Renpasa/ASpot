@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback, useRef } from 'react';
 import { APIProvider, Map, AdvancedMarker, Pin, useMap } from '@vis.gl/react-google-maps';
 import type { MapMouseEvent } from '@vis.gl/react-google-maps';
 import SpotList from '../components/SpotList';
+import SpotDetailPanel from '../components/SpotDetailPanel';
 import Header from '../components/Header';
 import AuthModal from '../components/AuthModal';
 import CreateSpotForm from '../components/CreateSpotForm';
@@ -170,13 +171,18 @@ export default function MapPage() {
               {loading && <div className="p-8 text-center text-gray-500">Loading spots...</div>}
               {error && <div className="p-8 text-center text-red-500">{error}</div>}
               {!loading && !error && (
-                <SpotList
-                  spots={spots}
-                  selectedSpot={selectedSpot}
-                  onSelectSpot={setSelectedSpot}
-                  hoveredSpotId={hoveredSpotId}
-                  onHoverSpot={setHoveredSpotId}
-                />
+                <>
+                  {selectedSpot && (
+                    <SpotDetailPanel spot={selectedSpot} onClear={() => setSelectedSpot(null)} />
+                  )}
+                  <SpotList
+                    spots={spots}
+                    selectedSpot={selectedSpot}
+                    onSelectSpot={setSelectedSpot}
+                    hoveredSpotId={hoveredSpotId}
+                    onHoverSpot={setHoveredSpotId}
+                  />
+                </>
               )}
             </>
           )}
