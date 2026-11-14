@@ -89,14 +89,21 @@ export default function MapPage() {
     }
   }, [isAuthModalOpen, user, pendingAction]);
 
+  const spotsRef = useRef<PhotoSpot[]>([]);
+  const spotsLoadedRef = useRef(false);
+
   const loadSpots = useCallback(async () => {
     try {
       setLoading(true);
+      spotsLoadedRef.current = false;
       const data = await fetchSpots();
+      spotsRef.current = data;
+      spotsLoadedRef.current = true;
       setSpots(data);
       setError(null);
     } catch (err) {
       console.error('Failed to load spots:', err);
+      spotsLoadedRef.current = false;
       setError('Failed to load spots. Please try again later.');
     } finally {
       setLoading(false);
@@ -107,15 +114,9 @@ export default function MapPage() {
     loadSpots();
   }, [loadSpots]);
 
-  const spotsRef = useRef<PhotoSpot[]>([]);
-
-  useEffect(() => {
-    spotsRef.current = spots;
-  }, [spots]);
-
   // Deep link: apply ?spot=<id> once the spot list is available.
   useEffect(() => {
-    if (loading) return;
+    if (loading || error) return;
     const { present, id } = readSpotParam();
     if (!present) return;
     const match = id === null ? undefined : spots.find((spot) => spot.id === id);
@@ -125,7 +126,7 @@ export default function MapPage() {
       setSelectedSpot(null);
       writeSpotParam(null, 'replace');
     }
-  }, [loading, spots]);
+  }, [loading, error, spots]);
 
   // Browser back/forward: keep the selection in sync with the URL.
   useEffect(() => {
@@ -135,7 +136,15 @@ export default function MapPage() {
         setSelectedSpot(null);
         return;
       }
-      const match = id === null ? undefined : spotsRef.current.find((spot) => spot.id === id);
+      if (id === null) {
+        setSelectedSpot(null);
+        writeSpotParam(null, 'replace');
+        return;
+      }
+      if (!spotsLoadedRef.current) {
+        return;
+      }
+      const match = spotsRef.current.find((spot) => spot.id === id);
       if (match) {
         setSelectedSpot(match);
       } else {
@@ -161,7 +170,7 @@ export default function MapPage() {
   const [showSuccessToast, setShowSuccessToast] = useState(false);
   const toastTimeoutRef = useRef<number | undefined>(undefined);
   const [createdSpot, setCreatedSpot] = useState<PhotoSpot | null>(null);
-  const [createdLinkCopied, setCreatedLinkCopied] = useState(false);
+  const [createdCopyState, setCreatedCopyState] = useState<'idle' | 'copied' | 'failed'>('idle');
   const copyTimeoutRef = useRef<number | undefined>(undefined);
 
   useEffect(() => {
@@ -175,10 +184,10 @@ export default function MapPage() {
     if (!createdSpot) return;
     const url = new URL(window.location.href);
     url.searchParams.set(SPOT_QUERY_PARAM, String(createdSpot.id));
-    await copyTextToClipboard(url.href);
-    setCreatedLinkCopied(true);
+    const ok = await copyTextToClipboard(url.href);
+    setCreatedCopyState(ok ? 'copied' : 'failed');
     clearTimeout(copyTimeoutRef.current);
-    copyTimeoutRef.current = window.setTimeout(() => setCreatedLinkCopied(false), 2000);
+    copyTimeoutRef.current = window.setTimeout(() => setCreatedCopyState('idle'), 2000);
   };
 
   const toggleCreatingMode = () => {
@@ -207,7 +216,7 @@ export default function MapPage() {
     setNewSpotLocation(null);
     selectSpot(newSpot);
     setCreatedSpot(newSpot);
-    setCreatedLinkCopied(false);
+    setCreatedCopyState('idle');
     setShowSuccessToast(true);
     clearTimeout(toastTimeoutRef.current);
     toastTimeoutRef.current = window.setTimeout(() => setShowSuccessToast(false), 3000);
@@ -239,7 +248,7 @@ export default function MapPage() {
               onClick={handleCopyCreatedSpotLink}
               className="px-2 py-1 rounded bg-white/20 hover:bg-white/30 text-sm font-semibold transition-colors whitespace-nowrap"
             >
-              {createdLinkCopied ? 'Link copied!' : 'Copy link'}
+              {createdCopyState === 'copied' ? 'Link copied!' : createdCopyState === 'failed' ? 'Copy failed' : 'Copy link'}
             </button>
           )}
         </div>

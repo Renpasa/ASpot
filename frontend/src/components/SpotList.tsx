@@ -37,7 +37,7 @@ interface Props {
 
 export default function SpotList({ spots, selectedSpot, onSelectSpot, hoveredSpotId, onHoverSpot }: Props) {
   const cardRefs = useRef<Record<number, HTMLDivElement | null>>({});
-  const [copiedSpotId, setCopiedSpotId] = useState<number | null>(null);
+  const [copyStatus, setCopyStatus] = useState<{ id: number; ok: boolean } | null>(null);
   const copyTimeoutRef = useRef<number | undefined>(undefined);
 
   useEffect(() => {
@@ -58,10 +58,10 @@ export default function SpotList({ spots, selectedSpot, onSelectSpot, hoveredSpo
     // Selection pushes ?spot=<id> onto the URL synchronously, so reading
     // window.location.href right after gives the shareable deep link.
     onSelectSpot(spot);
-    await copyTextToClipboard(window.location.href);
-    setCopiedSpotId(spot.id);
+    const ok = await copyTextToClipboard(window.location.href);
+    setCopyStatus({ id: spot.id, ok });
     clearTimeout(copyTimeoutRef.current);
-    copyTimeoutRef.current = window.setTimeout(() => setCopiedSpotId(null), 2000);
+    copyTimeoutRef.current = window.setTimeout(() => setCopyStatus(null), 2000);
   };
 
   if (spots.length === 0) {
@@ -152,7 +152,7 @@ export default function SpotList({ spots, selectedSpot, onSelectSpot, hoveredSpo
                   onClick={(e) => handleCopyLink(e, spot)}
                   className="text-sm px-2 py-1 rounded border border-blue-500 text-blue-600 hover:bg-blue-50 transition-colors whitespace-nowrap"
                 >
-                  {copiedSpotId === spot.id ? 'Link copied!' : 'Copy link'}
+                  {copyStatus?.id === spot.id ? (copyStatus.ok ? 'Link copied!' : 'Copy failed') : 'Copy link'}
                 </button>
               </div>
             </div>
