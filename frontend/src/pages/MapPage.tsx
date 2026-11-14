@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { APIProvider, Map, AdvancedMarker, Pin, useMap } from '@vis.gl/react-google-maps';
 import type { MapMouseEvent } from '@vis.gl/react-google-maps';
-import SpotList from '../components/SpotList';
+import SpotList, { copyTextToClipboard } from '../components/SpotList';
 import Header from '../components/Header';
 import AuthModal from '../components/AuthModal';
 import CreateSpotForm from '../components/CreateSpotForm';
@@ -9,6 +9,24 @@ import MarkersWithClustering from '../components/MarkersWithClustering';
 import type { PhotoSpot, CreateSpotPayload } from '../types';
 import { fetchSpots, createSpot } from '../api/client';
 import { useAuth } from '../context/AuthContext';
+
+const SPOT_QUERY_PARAM = 'spot';
+
+const readSpotParam = (): { present: boolean; id: number | null } => {
+  const raw = new URLSearchParams(window.location.search).get(SPOT_QUERY_PARAM);
+  if (raw === null) return { present: false, id: null };
+  const id = /^\d+$/.test(raw) ? Number(raw) : Number.NaN;
+  return { present: true, id: Number.isSafeInteger(id) && id > 0 ? id : null };
+};
+
+const writeSpotParam = (id: number | null, mode: 'push' | 'replace') => {
+  const url = new URL(window.location.href);
+  if (id === null) url.searchParams.delete(SPOT_QUERY_PARAM);
+  else url.searchParams.set(SPOT_QUERY_PARAM, String(id));
+  if (url.href === window.location.href) return;
+  if (mode === 'push') window.history.pushState(null, '', url.href);
+  else window.history.replaceState(null, '', url.href);
+};
 
 const MapInteractivity = ({ selectedSpot }: { selectedSpot: PhotoSpot | null }) => {
   const map = useMap();
@@ -37,14 +55,24 @@ export default function MapPage() {
 
   const { user } = useAuth();
 
+  const selectSpot = useCallback((spot: PhotoSpot | null) => {
+    setSelectedSpot(spot);
+    const current = readSpotParam();
+    if (!spot) {
+      if (current.present) writeSpotParam(null, 'replace');
+      return;
+    }
+    writeSpotParam(spot.id, current.id === spot.id ? 'replace' : 'push');
+  }, []);
+
   useEffect(() => {
     if (user && pendingAction === 'create') {
       setIsCreatingMode(true);
-      setSelectedSpot(null);
+      selectSpot(null);
       setNewSpotLocation(null);
       setPendingAction(null);
     }
-  }, [user, pendingAction]);
+  }, [user, pendingAction, selectSpot]);
 
   useEffect(() => {
     if (!user && isCreatingMode) {
@@ -61,14 +89,21 @@ export default function MapPage() {
     }
   }, [isAuthModalOpen, user, pendingAction]);
 
+  const spotsRef = useRef<PhotoSpot[]>([]);
+  const spotsLoadedRef = useRef(false);
+
   const loadSpots = useCallback(async () => {
     try {
       setLoading(true);
+      spotsLoadedRef.current = false;
       const data = await fetchSpots();
+      spotsRef.current = data;
+      spotsLoadedRef.current = true;
       setSpots(data);
       setError(null);
     } catch (err) {
       console.error('Failed to load spots:', err);
+      spotsLoadedRef.current = false;
       setError('Failed to load spots. Please try again later.');
     } finally {
       setLoading(false);
@@ -79,6 +114,48 @@ export default function MapPage() {
     loadSpots();
   }, [loadSpots]);
 
+  // Deep link: apply ?spot=<id> once the spot list is available.
+  useEffect(() => {
+    if (loading || error) return;
+    const { present, id } = readSpotParam();
+    if (!present) return;
+    const match = id === null ? undefined : spots.find((spot) => spot.id === id);
+    if (match) {
+      setSelectedSpot(match);
+    } else {
+      setSelectedSpot(null);
+      writeSpotParam(null, 'replace');
+    }
+  }, [loading, error, spots]);
+
+  // Browser back/forward: keep the selection in sync with the URL.
+  useEffect(() => {
+    const handlePopState = () => {
+      const { present, id } = readSpotParam();
+      if (!present) {
+        setSelectedSpot(null);
+        return;
+      }
+      if (id === null) {
+        setSelectedSpot(null);
+        writeSpotParam(null, 'replace');
+        return;
+      }
+      if (!spotsLoadedRef.current) {
+        return;
+      }
+      const match = spotsRef.current.find((spot) => spot.id === id);
+      if (match) {
+        setSelectedSpot(match);
+      } else {
+        setSelectedSpot(null);
+        writeSpotParam(null, 'replace');
+      }
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
   const handleMapClick = useCallback((e: MapMouseEvent) => {
     if (isCreatingMode && e.detail.latLng) {
       setNewSpotLocation({
@@ -86,18 +163,32 @@ export default function MapPage() {
         lng: e.detail.latLng.lng,
       });
     } else {
-       setSelectedSpot(null);
+      selectSpot(null);
     }
-  }, [isCreatingMode]);
+  }, [isCreatingMode, selectSpot]);
 
   const [showSuccessToast, setShowSuccessToast] = useState(false);
   const toastTimeoutRef = useRef<number | undefined>(undefined);
+  const [createdSpot, setCreatedSpot] = useState<PhotoSpot | null>(null);
+  const [createdCopyState, setCreatedCopyState] = useState<'idle' | 'copied' | 'failed'>('idle');
+  const copyTimeoutRef = useRef<number | undefined>(undefined);
 
   useEffect(() => {
     return () => {
       clearTimeout(toastTimeoutRef.current);
+      clearTimeout(copyTimeoutRef.current);
     };
   }, []);
+
+  const handleCopyCreatedSpotLink = async () => {
+    if (!createdSpot) return;
+    const url = new URL(window.location.href);
+    url.searchParams.set(SPOT_QUERY_PARAM, String(createdSpot.id));
+    const ok = await copyTextToClipboard(url.href);
+    setCreatedCopyState(ok ? 'copied' : 'failed');
+    clearTimeout(copyTimeoutRef.current);
+    copyTimeoutRef.current = window.setTimeout(() => setCreatedCopyState('idle'), 2000);
+  };
 
   const toggleCreatingMode = () => {
     if (!user) {
@@ -109,11 +200,11 @@ export default function MapPage() {
     setIsCreatingMode(!isCreatingMode);
     if (!isCreatingMode) {
       // Entering creation mode
-      setSelectedSpot(null);
+      selectSpot(null);
       setNewSpotLocation(null);
     } else {
       // Exiting creation mode
-      setSelectedSpot(null);
+      selectSpot(null);
       setNewSpotLocation(null);
     }
   };
@@ -123,7 +214,9 @@ export default function MapPage() {
     await loadSpots();
     setIsCreatingMode(false);
     setNewSpotLocation(null);
-    setSelectedSpot(newSpot);
+    selectSpot(newSpot);
+    setCreatedSpot(newSpot);
+    setCreatedCopyState('idle');
     setShowSuccessToast(true);
     clearTimeout(toastTimeoutRef.current);
     toastTimeoutRef.current = window.setTimeout(() => setShowSuccessToast(false), 3000);
@@ -133,9 +226,9 @@ export default function MapPage() {
     if (isCreatingMode) {
       setNewSpotLocation({ lat: spot.lat, lng: spot.lng });
     } else {
-      setSelectedSpot(spot);
+      selectSpot(spot);
     }
-  }, [isCreatingMode]);
+  }, [isCreatingMode, selectSpot]);
 
   return (
     <div className="flex flex-col h-screen w-screen overflow-hidden">
@@ -146,8 +239,18 @@ export default function MapPage() {
         }
       `}</style>
       {showSuccessToast && (
-        <div className="fixed top-20 left-1/2 transform -translate-x-1/2 z-50 bg-green-500 text-white px-6 py-3 rounded shadow-lg font-medium transition-opacity">
-          Spot successfully created!
+        <div className="fixed top-20 left-1/2 transform -translate-x-1/2 z-50 bg-green-500 text-white px-6 py-3 rounded shadow-lg font-medium transition-opacity flex items-center gap-3">
+          <span>Spot successfully created!</span>
+          {createdSpot && (
+            <button
+              type="button"
+              data-testid="share-created-spot"
+              onClick={handleCopyCreatedSpotLink}
+              className="px-2 py-1 rounded bg-white/20 hover:bg-white/30 text-sm font-semibold transition-colors whitespace-nowrap"
+            >
+              {createdCopyState === 'copied' ? 'Link copied!' : createdCopyState === 'failed' ? 'Copy failed' : 'Copy link'}
+            </button>
+          )}
         </div>
       )}
       <Header
@@ -173,7 +276,7 @@ export default function MapPage() {
                 <SpotList
                   spots={spots}
                   selectedSpot={selectedSpot}
-                  onSelectSpot={setSelectedSpot}
+                  onSelectSpot={selectSpot}
                   hoveredSpotId={hoveredSpotId}
                   onHoverSpot={setHoveredSpotId}
                 />
