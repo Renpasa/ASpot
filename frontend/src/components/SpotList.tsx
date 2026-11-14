@@ -1,4 +1,3 @@
-import { useEffect, useRef } from 'react';
 import type { PhotoSpot } from '../types';
 
 interface Props {
@@ -10,16 +9,8 @@ interface Props {
 }
 
 export default function SpotList({ spots, selectedSpot, onSelectSpot, hoveredSpotId, onHoverSpot }: Props) {
-  const cardRefs = useRef<Record<number, HTMLDivElement | null>>({});
-
-  useEffect(() => {
-    if (selectedSpot && cardRefs.current[selectedSpot.id]) {
-      cardRefs.current[selectedSpot.id]?.scrollIntoView({
-        behavior: 'smooth',
-        block: 'nearest',
-      });
-    }
-  }, [selectedSpot]);
+  // Selection reveal is owned by the detail panel; keeping a second
+  // scroll-into-view here raced with it and hid the panel.
   if (spots.length === 0) {
     return <div className="p-8 text-center text-gray-500">No photo spots available yet.</div>;
   }
@@ -38,7 +29,6 @@ export default function SpotList({ spots, selectedSpot, onSelectSpot, hoveredSpo
         return (
           <div
             key={spot.id}
-            ref={el => { cardRefs.current[spot.id] = el; }}
             onClick={() => onSelectSpot(spot)}
             onKeyDown={(e) => {
               if (e.key === 'Enter' || e.key === ' ') {

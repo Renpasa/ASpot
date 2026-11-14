@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { PhotoSpot } from '../types';
 
 interface Props {
@@ -19,12 +19,20 @@ export default function SpotDetailPanel({ spot, onClear }: Props) {
   const [imageSrc, setImageSrc] = useState(spot.photo_url || fallbackUrl);
   // One fallback attempt only: retrying a failing fallback would loop forever.
   const fallbackAttempted = useRef(false);
+  const panelRef = useRef<HTMLElement | null>(null);
+
+  // Selection must reveal the panel: the list's own scroll-into-view used to
+  // win the race and leave the panel offscreen.
+  useEffect(() => {
+    panelRef.current?.scrollIntoView({ block: 'start' });
+  }, [spot.id]);
 
   return (
     <section
+      ref={panelRef}
       data-testid="spot-detail-panel"
       aria-label={`Selected spot: ${spot.title}`}
-      className="sticky top-0 z-10 border-b border-gray-200 bg-white"
+      className="border-b border-gray-200 bg-white"
     >
       <div className="flex items-start justify-between gap-3 px-4 pt-4">
         <h3 data-testid="spot-detail-title" className="text-lg font-semibold text-gray-900">
