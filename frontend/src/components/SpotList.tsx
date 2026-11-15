@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import SpotImage from './SpotImage';
 import type { PhotoSpot } from '../types';
 
 interface Props {
@@ -26,13 +27,14 @@ export default function SpotList({ spots, selectedSpot, onSelectSpot, hoveredSpo
 
   return (
     <div className="p-4">
-      <h2 className="text-2xl font-bold mb-4 text-gray-800 break-inside-avoid">Photo Spots</h2>
+      <h2 className="text-2xl font-bold text-gray-800 break-inside-avoid">Photo Spots</h2>
+      <p className="mb-4 mt-1 text-sm text-gray-600">
+        Discover photo spots shared by the community.
+      </p>
       <div className="columns-1 sm:columns-2 xl:columns-3 gap-4">
       {spots.map(spot => {
         const isSelected = selectedSpot?.id === spot.id;
         const isHovered = hoveredSpotId === spot.id;
-        const imageUrl = spot.photo_url || `https://picsum.photos/seed/${spot.id}/600/400`;
-
         return (
           <div
             key={spot.id}
@@ -57,14 +59,7 @@ export default function SpotList({ spots, selectedSpot, onSelectSpot, hoveredSpo
                   : 'border-transparent hover:border-gray-300 hover:shadow-lg'
             }`}
           >
-            <img
-              src={imageUrl}
-              alt={spot.title}
-              className="w-full object-cover max-h-60"
-              onError={(e) => {
-                (e.target as HTMLImageElement).src = `https://picsum.photos/seed/${spot.id}/600/400`;
-              }}
-            />
+            <SpotImage spot={spot} />
             <div className="p-4">
               <h3 className="text-xl font-semibold text-gray-800">{spot.title}</h3>
 
