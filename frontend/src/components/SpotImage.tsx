@@ -20,6 +20,12 @@ interface Props {
  * a committed inline SVG once, so layout stays stable offline or on 404/522.
  */
 export default function SpotImage({ spot }: Props) {
+  // Remount per spot identity: image state and the fallback guard must not
+  // carry over when a card is reused for a different spot or photo URL.
+  return <SpotImageFrame key={`${spot.id}:${spot.photo_url}`} spot={spot} />;
+}
+
+function SpotImageFrame({ spot }: Props) {
   const [src, setSrc] = useState(spot.photo_url || PLACEHOLDER);
   const fallbackUsed = useRef(!spot.photo_url);
 
